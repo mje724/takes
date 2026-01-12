@@ -438,13 +438,38 @@
     .option-btn.selected .option-letter {
       background: var(--accent);
       color: var(--bg-primary);
+    }
+
+    .other-input-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .other-input-container.visible {
+      display: block;
+    }
+
+    .other-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .other-input::placeholder {
+      color: var(--text-muted);
+    }
 
     /* Ranking UI - Tap to Rank */
     .ranking-container {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 16px;
     }
 
     .ranking-slots {
@@ -490,6 +515,8 @@
       font-size: 14px;
       font-weight: 700;
       flex-shrink: 0;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
     }
 
     .rank-1 .ranking-slot-number {
@@ -553,13 +580,6 @@
       border-color: var(--border);
     }
 
-    .ranking-hint {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 8px;
-    }
-
     .ranking-reset {
       background: none;
       border: none;
@@ -567,47 +587,83 @@
       font-size: 13px;
       cursor: pointer;
       text-decoration: underline;
-      margin-top: 8px;
+      margin-top: 12px;
+      text-align: center;
+      width: 100%;
     }
 
     .ranking-reset:hover {
       color: var(--text-secondary);
     }
 
-    /* Mad Lib Input */
-    .madlib-input-container {
-      margin-top: 24px;
+    /* Mad Lib UI */
+    .madlib-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .madlib-sentence {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.6;
+      text-align: center;
+      color: var(--text-primary);
+    }
+
+    .madlib-blank {
+      display: inline-block;
+      min-width: 120px;
+      border-bottom: 3px solid var(--accent);
+      color: var(--accent);
+      padding: 0 8px;
+      margin: 0 4px;
+    }
+
+    .madlib-blank.filled {
+      border-bottom-style: solid;
+    }
+
+    .madlib-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .madlib-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .madlib-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .madlib-input {
       width: 100%;
       background: var(--bg-secondary);
-      border: 2px solid var(--accent);
+      border: 2px solid var(--border);
       border-radius: 12px;
-      padding: 18px 20px;
+      padding: 16px 20px;
       font-family: 'Outfit', sans-serif;
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 16px;
       color: var(--text-primary);
       outline: none;
-      transition: all 0.2s;
-    }
-
-    .madlib-input::placeholder {
-      color: var(--text-muted);
+      transition: border-color 0.2s;
     }
 
     .madlib-input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(200, 255, 0, 0.15);
     }
 
-    .madlib-hint {
-      text-align: center;
-      font-size: 13px;
+    .madlib-input::placeholder {
       color: var(--text-muted);
-      margin-top: 12px;
-      font-style: italic;
     }
 
     .prompt-type-tag {
@@ -620,31 +676,6 @@
       background: var(--bg-elevated);
       color: var(--text-muted);
       margin-left: 8px;
-    }
-
-    .other-input-container {
-      display: none;
-      margin-top: 12px;
-    }
-
-    .other-input-container.visible {
-      display: block;
-    }
-
-    .other-input {
-      width: 100%;
-      background: var(--bg-secondary);
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      padding: 16px 20px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 16px;
-      color: var(--text-primary);
-      outline: none;
-    }
-
-    .other-input::placeholder {
-      color: var(--text-muted);
     }
 
     /* Results Screen */
@@ -831,33 +862,27 @@
       letter-spacing: 1px;
     }
 
-    .share-percentages {
+    .share-grid {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       margin-bottom: 28px;
-      flex-wrap: wrap;
     }
 
-    .share-percent-item {
-      background: var(--bg-elevated);
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-family: 'Space Mono', monospace;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-secondary);
+    .share-grid-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
     }
 
-    .share-percent-item.high {
-      background: rgba(200, 255, 0, 0.15);
-      color: var(--accent);
-    }
-
-    .share-percent-item.medium {
-      background: rgba(255, 170, 0, 0.15);
-      color: var(--warning);
-    }
+    .share-grid-item.top1 { background: var(--accent); }
+    .share-grid-item.top3 { background: var(--warning); }
+    .share-grid-item.top5 { background: var(--text-muted); }
+    .share-grid-item.outside { background: var(--bg-elevated); }
 
     .share-buttons {
       display: flex;
@@ -1127,115 +1152,6 @@
     .stagger-3 { animation-delay: 0.15s; }
     .stagger-4 { animation-delay: 0.2s; }
     .stagger-5 { animation-delay: 0.25s; }
-
-    /* Category Selection */
-    .category-select-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .category-select-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 32px;
-      justify-content: center;
-    }
-
-    .category-select-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      text-align: center;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    .category-select-btn:hover {
-      border-color: var(--text-muted);
-      background: var(--bg-elevated);
-    }
-
-    .category-select-btn.selected {
-      border-color: var(--accent);
-      background: rgba(200, 255, 0, 0.1);
-      color: var(--accent);
-    }
-
-    .category-select-btn.all-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .category-select-btn.all-btn.selected {
-      background: var(--accent);
-      color: var(--bg-primary);
-      border-color: var(--accent);
-    }
-
-    /* Yesterday's Results */
-    .yesterday-results {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-
-    .yesterday-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .yesterday-item {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .yesterday-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .yesterday-question {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-    }
-
-    .yesterday-answer {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .yesterday-percent {
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      color: var(--accent);
-      margin-left: 8px;
-    }
   </style>
 </head>
 <body>
@@ -1256,24 +1172,6 @@
       <div class="hero">
         <div class="hero-logo">TAKES</div>
         <p class="hero-tagline">Daily sports & culture opinions.<br>See where you stand.</p>
-      </div>
-
-      <!-- Yesterday's Results (shown if available) -->
-      <div id="yesterday-results" class="yesterday-results" style="display: none;">
-        <div class="yesterday-title">Yesterday's Top Answers</div>
-        <div id="yesterday-content"></div>
-      </div>
-
-      <div class="category-select-title">Pick your categories</div>
-      <div class="category-select-grid">
-        <button class="category-select-btn all-btn selected" onclick="toggleAllCategories(this)">All Categories</button>
-        <button class="category-select-btn" data-category="NFL" onclick="toggleCategory(this)">NFL</button>
-        <button class="category-select-btn" data-category="NBA" onclick="toggleCategory(this)">NBA</button>
-        <button class="category-select-btn" data-category="NHL" onclick="toggleCategory(this)">NHL</button>
-        <button class="category-select-btn" data-category="MLB" onclick="toggleCategory(this)">MLB</button>
-        <button class="category-select-btn" data-category="Soccer" onclick="toggleCategory(this)">Soccer</button>
-        <button class="category-select-btn" data-category="Actors" onclick="toggleCategory(this)">Actors</button>
-        <button class="category-select-btn" data-category="Musicians" onclick="toggleCategory(this)">Music</button>
       </div>
 
       <button class="btn btn-primary" onclick="startGame()">Play</button>
@@ -1317,11 +1215,15 @@
         <div class="share-date" id="share-date"></div>
         <div class="share-stats">
           <div class="share-stat">
+            <div class="share-stat-value" id="share-top-picks">0</div>
+            <div class="share-stat-label">Top Picks</div>
+          </div>
+          <div class="share-stat">
             <div class="share-stat-value" id="share-avg-percent">0%</div>
-            <div class="share-stat-label">Avg Agreement</div>
+            <div class="share-stat-label">Avg Match</div>
           </div>
         </div>
-        <div class="share-percentages" id="share-percentages"></div>
+        <div class="share-grid" id="share-grid"></div>
         <div class="share-buttons">
           <button class="btn btn-share" onclick="shareResults()">Share Results</button>
           <button class="btn btn-secondary" onclick="playAgain()">Play Again</button>
@@ -1360,13 +1262,6 @@
         <div class="admin-section-title">Add Single Prompt</div>
         <div class="prompt-form">
           <div class="form-group">
-            <label class="form-label">Type</label>
-            <div class="toggle-group">
-              <button type="button" class="toggle-btn active" id="toggle-fill" onclick="setPromptType('fill')">Fill in Blank</button>
-              <button type="button" class="toggle-btn" id="toggle-ranking" onclick="setPromptType('ranking')">Rank 1-2-3</button>
-            </div>
-          </div>
-          <div class="form-group">
             <label class="form-label">Category</label>
             <select class="form-select" id="prompt-category">
               <option value="NFL">NFL</option>
@@ -1376,18 +1271,17 @@
               <option value="Soccer">Soccer</option>
               <option value="Actors">Actors/Actresses</option>
               <option value="Musicians">Musicians</option>
-              <option value="Mixed">Mixed (Cross-Category)</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Prompt Text</label>
             <input type="text" class="form-input" id="prompt-text" placeholder="_____ is the GOAT of basketball">
-            <div class="form-hint" id="prompt-text-hint">Use _____ for the blank</div>
+            <div class="form-hint">Use _____ for the blank</div>
           </div>
           <div class="form-group">
-            <label class="form-label" id="options-label">Answer Options</label>
+            <label class="form-label">Answer Options</label>
             <textarea class="form-textarea" id="prompt-options" placeholder="Michael Jordan&#10;LeBron James&#10;Kobe Bryant&#10;Kareem Abdul-Jabbar"></textarea>
-            <div class="form-hint" id="options-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
+            <div class="form-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Status</label>
@@ -1441,15 +1335,14 @@
           // localStorage fallback
           const data = localStorage.getItem('takes_prompts');
           const prompts = data ? JSON.parse(data) : [];
-          return prompts.filter(p => p.is_active !== false).slice(0, 5);
+          return prompts.filter(p => p.is_active !== false);
         }
 
         const { data, error } = await supabaseClient
           .from('prompts')
           .select('*')
           .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(5);
+          .order('created_at', { ascending: false });
 
         if (error) {
           console.error('Error fetching prompts:', error);
@@ -1638,44 +1531,8 @@
     let isOtherSelected = false;
     let todaysPrompts = [];
     let newPromptIsActive = true;
-    let selectedCategories = new Set(); // empty = all categories
-    let userPercentages = []; // store percentages for sharing
-
-    // ==================== CATEGORY SELECTION ====================
-    function toggleAllCategories(btn) {
-      const categoryBtns = document.querySelectorAll('.category-select-btn[data-category]');
-      
-      if (btn.classList.contains('selected')) {
-        // Already selected, do nothing (must have at least "all" or some categories)
-        return;
-      }
-      
-      // Select "All" and deselect individual categories
-      btn.classList.add('selected');
-      categoryBtns.forEach(b => b.classList.remove('selected'));
-      selectedCategories.clear();
-    }
-
-    function toggleCategory(btn) {
-      const allBtn = document.querySelector('.category-select-btn.all-btn');
-      const category = btn.dataset.category;
-      
-      if (btn.classList.contains('selected')) {
-        // Deselecting
-        btn.classList.remove('selected');
-        selectedCategories.delete(category);
-        
-        // If nothing selected, default back to "All"
-        if (selectedCategories.size === 0) {
-          allBtn.classList.add('selected');
-        }
-      } else {
-        // Selecting
-        btn.classList.add('selected');
-        selectedCategories.add(category);
-        allBtn.classList.remove('selected');
-      }
-    }
+    let rankingState = [];
+    let madlibAnswers = { person: '', comparison: '', field: '' };
 
     // ==================== UI HELPERS ====================
     function formatDate(date) {
@@ -1731,61 +1588,6 @@
     }
 
     // ==================== GAME FLOW ====================
-    // Mad lib templates based on categories
-    const madLibTemplates = {
-      NFL: [
-        "The most overrated thing in the NFL is _____",
-        "The NFL would be better if _____",
-        "My hottest NFL take is _____"
-      ],
-      NBA: [
-        "The most overrated thing in the NBA is _____",
-        "The NBA would be better if _____",
-        "My hottest NBA take is _____"
-      ],
-      NHL: [
-        "The most overrated thing in hockey is _____",
-        "The NHL would be better if _____",
-        "My hottest hockey take is _____"
-      ],
-      MLB: [
-        "The most overrated thing in baseball is _____",
-        "Baseball would be better if _____",
-        "My hottest baseball take is _____"
-      ],
-      Soccer: [
-        "The most overrated thing in soccer is _____",
-        "Soccer would be better if _____",
-        "My hottest soccer take is _____"
-      ],
-      Actors: [
-        "The most overrated thing in Hollywood is _____",
-        "Movies would be better if _____",
-        "My hottest film take is _____"
-      ],
-      Musicians: [
-        "The most overrated thing in music is _____",
-        "Music would be better if _____",
-        "My hottest music take is _____"
-      ],
-      Mixed: [
-        "My hottest sports take is _____",
-        "My most controversial opinion is _____",
-        "The most overrated thing in sports is _____"
-      ]
-    };
-
-    function getMadLibForCategories(categories) {
-      let templates;
-      if (categories.size === 0 || categories.size > 2) {
-        templates = madLibTemplates.Mixed;
-      } else {
-        const cat = [...categories][0];
-        templates = madLibTemplates[cat] || madLibTemplates.Mixed;
-      }
-      return templates[Math.floor(Math.random() * templates.length)];
-    }
-
     async function startGame() {
       let allPrompts = await DB.getActivePrompts();
       
@@ -1794,65 +1596,32 @@
         return;
       }
 
-      // Filter by selected categories (if any selected)
-      if (selectedCategories.size > 0) {
-        allPrompts = allPrompts.filter(p => selectedCategories.has(p.category));
-      }
-
-      if (allPrompts.length === 0) {
-        alert('No prompts available for selected categories.');
-        return;
-      }
-
-      // Separate ranking and non-ranking prompts
-      const rankingPrompts = allPrompts.filter(p => p.type === 'ranking');
+      // Separate by type
       const fillPrompts = allPrompts.filter(p => p.type !== 'ranking');
+      const rankingPrompts = allPrompts.filter(p => p.type === 'ranking');
 
-      // Shuffle fill prompts
+      // Shuffle and pick 3 fill-in-blank
       const shuffledFill = fillPrompts.sort(() => Math.random() - 0.5);
-
-      // Take up to 3 fill prompts
       const selectedFill = shuffledFill.slice(0, 3);
-      
-      // Get 1 ranking prompt (from Mixed category always available, or from selected)
-      let selectedRanking = [];
-      if (selectedCategories.size === 0) {
-        // All categories - use Mixed rankings
-        const mixedRankings = (await DB.getActivePrompts()).filter(p => p.type === 'ranking' && p.category === 'Mixed');
-        if (mixedRankings.length > 0) {
-          selectedRanking = [mixedRankings[Math.floor(Math.random() * mixedRankings.length)]];
-        }
-      } else if (rankingPrompts.length > 0) {
-        selectedRanking = [rankingPrompts[Math.floor(Math.random() * rankingPrompts.length)]];
-      } else {
-        // No category-specific rankings, try Mixed
-        const mixedRankings = (await DB.getActivePrompts()).filter(p => p.type === 'ranking' && p.category === 'Mixed');
-        if (mixedRankings.length > 0) {
-          selectedRanking = [mixedRankings[Math.floor(Math.random() * mixedRankings.length)]];
-        }
-      }
 
-      // Create mad lib prompt for the end
-      const madLibText = getMadLibForCategories(selectedCategories);
+      // Pick 1 random ranking
+      const selectedRanking = rankingPrompts.length > 0 
+        ? [rankingPrompts[Math.floor(Math.random() * rankingPrompts.length)]]
+        : [];
+
+      // Create mad lib prompt
       const madLibPrompt = {
         id: 'madlib',
         type: 'madlib',
-        category: selectedCategories.size === 1 ? [...selectedCategories][0] : 'Mixed',
-        text: madLibText,
-        options: []
+        category: 'Mixed',
+        text: '_____ is the _____ of _____'
       };
 
-      // Build final prompt order: fill-in-blanks → ranking → mad lib
+      // Build game: fill-in-blank → ranking → mad lib
       todaysPrompts = [...selectedFill, ...selectedRanking, madLibPrompt];
-
-      if (todaysPrompts.length < 2) {
-        alert('Not enough prompts available. Add more in admin!');
-        return;
-      }
 
       currentPromptIndex = 0;
       userAnswers = [];
-      userPercentages = [];
       
       showScreen('game-screen');
       renderProgress();
@@ -1875,42 +1644,45 @@
     function renderPrompt() {
       const prompt = todaysPrompts[currentPromptIndex];
       const container = document.getElementById('prompt-container');
-      const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
-      const isRanking = prompt.type === 'ranking';
-      const isMadLib = prompt.type === 'madlib';
-
-      if (isMadLib) {
-        // Mad lib free-text UI
-        const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
+      
+      if (prompt.type === 'madlib') {
+        // Mad lib UI: "_____ is the _____ of _____"
         container.innerHTML = `
           <div class="prompt-card animate-in">
             <div style="display: flex; align-items: center; margin-bottom: 20px;">
-              <span class="prompt-category ${(prompt.category || 'mixed').toLowerCase()}">${prompt.category || 'MIXED'}</span>
-              <span class="prompt-type-tag">YOUR TAKE</span>
+              <span class="prompt-category mixed">${prompt.category}</span>
+              <span class="prompt-type-tag">CREATE</span>
             </div>
-            <div class="prompt-text">${promptText}</div>
-            <div class="madlib-input-container">
-              <input type="text" class="madlib-input" id="madlib-input" placeholder="Type your hot take..." maxlength="100">
-              <div class="madlib-hint">Be bold. Be controversial.</div>
+            <div class="madlib-sentence" id="madlib-preview">
+              <span class="madlib-blank" id="blank-person">_____</span> is the 
+              <span class="madlib-blank" id="blank-comparison">_____</span> of 
+              <span class="madlib-blank" id="blank-field">_____</span>
+            </div>
+            <div class="madlib-inputs">
+              <div class="madlib-input-group">
+                <label class="madlib-label">Person / Team</label>
+                <input type="text" class="madlib-input" id="madlib-person" placeholder="e.g., LeBron James" maxlength="30" oninput="updateMadlib()">
+              </div>
+              <div class="madlib-input-group">
+                <label class="madlib-label">Comparison</label>
+                <input type="text" class="madlib-input" id="madlib-comparison" placeholder="e.g., Tom Brady" maxlength="30" oninput="updateMadlib()">
+              </div>
+              <div class="madlib-input-group">
+                <label class="madlib-label">Field / Industry</label>
+                <input type="text" class="madlib-input" id="madlib-field" placeholder="e.g., basketball" maxlength="30" oninput="updateMadlib()">
+              </div>
             </div>
           </div>
         `;
         
-        const input = document.getElementById('madlib-input');
-        input.addEventListener('input', (e) => {
-          selectedOption = e.target.value.trim();
-          document.getElementById('next-btn').disabled = selectedOption.length === 0;
-        });
-        input.addEventListener('keyup', (e) => {
-          if (e.key === 'Enter' && selectedOption && selectedOption.length > 0) {
-            nextPrompt();
-          }
-        });
-        
+        madlibAnswers = { person: '', comparison: '', field: '' };
         selectedOption = null;
         document.getElementById('next-btn').disabled = true;
-      } else if (isRanking) {
-        // Tap-to-rank UI
+        
+      } else if (prompt.type === 'ranking') {
+        // Ranking UI
+        const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
+        
         container.innerHTML = `
           <div class="prompt-card animate-in">
             <div style="display: flex; align-items: center; margin-bottom: 20px;">
@@ -1922,19 +1694,19 @@
               <div class="ranking-slots" id="ranking-slots">
                 <div class="ranking-slot rank-1" data-rank="1">
                   <div class="ranking-slot-number">1</div>
-                  <div class="ranking-slot-placeholder">Tap your #1 pick</div>
+                  <div class="ranking-slot-placeholder">Tap your #1</div>
                 </div>
                 <div class="ranking-slot rank-2" data-rank="2">
                   <div class="ranking-slot-number">2</div>
-                  <div class="ranking-slot-placeholder">Tap your #2 pick</div>
+                  <div class="ranking-slot-placeholder">Tap your #2</div>
                 </div>
                 <div class="ranking-slot rank-3" data-rank="3">
                   <div class="ranking-slot-number">3</div>
-                  <div class="ranking-slot-placeholder">Tap your #3 pick</div>
+                  <div class="ranking-slot-placeholder">Tap your #3</div>
                 </div>
               </div>
               <div class="ranking-choices" id="ranking-choices">
-                ${options.map((option, i) => `
+                ${options.map(option => `
                   <button class="ranking-choice" data-name="${option.replace(/"/g, '&quot;')}" onclick="selectRank('${option.replace(/'/g, "\\'")}')">
                     ${option}
                   </button>
@@ -1948,8 +1720,10 @@
         rankingState = [];
         selectedOption = null;
         document.getElementById('next-btn').disabled = true;
+        
       } else {
-        // Fill-in-the-blank UI (existing)
+        // Fill-in-the-blank UI (original)
+        const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
         const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -1984,15 +1758,12 @@
         currentPromptIndex === todaysPrompts.length - 1 ? 'See Results' : 'Next';
     }
 
-    let rankingState = [];
-
+    // Ranking functions
     function selectRank(name) {
-      // Add to ranking state
       if (rankingState.includes(name)) return;
       
       rankingState.push(name);
       
-      // Update UI
       const slots = document.querySelectorAll('.ranking-slot');
       const slot = slots[rankingState.length - 1];
       
@@ -2004,15 +1775,12 @@
         `;
       }
       
-      // Mark choice as selected
-      const choices = document.querySelectorAll('.ranking-choice');
-      choices.forEach(choice => {
+      document.querySelectorAll('.ranking-choice').forEach(choice => {
         if (choice.dataset.name === name) {
           choice.classList.add('selected');
         }
       });
       
-      // Check if complete
       if (rankingState.length === 3) {
         selectedOption = rankingState.join('|||');
         document.getElementById('next-btn').disabled = false;
@@ -2024,19 +1792,43 @@
       selectedOption = null;
       document.getElementById('next-btn').disabled = true;
       
-      // Reset slots
-      const slots = document.querySelectorAll('.ranking-slot');
-      slots.forEach((slot, i) => {
+      document.querySelectorAll('.ranking-slot').forEach((slot, i) => {
         slot.classList.remove('filled');
         slot.innerHTML = `
           <div class="ranking-slot-number">${i + 1}</div>
-          <div class="ranking-slot-placeholder">Tap your #${i + 1} pick</div>
+          <div class="ranking-slot-placeholder">Tap your #${i + 1}</div>
         `;
       });
       
-      // Reset choices
-      const choices = document.querySelectorAll('.ranking-choice');
-      choices.forEach(choice => choice.classList.remove('selected'));
+      document.querySelectorAll('.ranking-choice').forEach(choice => {
+        choice.classList.remove('selected');
+      });
+    }
+
+    // Mad lib functions
+    function updateMadlib() {
+      const person = document.getElementById('madlib-person').value.trim();
+      const comparison = document.getElementById('madlib-comparison').value.trim();
+      const field = document.getElementById('madlib-field').value.trim();
+      
+      madlibAnswers = { person, comparison, field };
+      
+      document.getElementById('blank-person').textContent = person || '_____';
+      document.getElementById('blank-person').classList.toggle('filled', !!person);
+      
+      document.getElementById('blank-comparison').textContent = comparison || '_____';
+      document.getElementById('blank-comparison').classList.toggle('filled', !!comparison);
+      
+      document.getElementById('blank-field').textContent = field || '_____';
+      document.getElementById('blank-field').classList.toggle('filled', !!field);
+      
+      if (person && comparison && field) {
+        selectedOption = `${person} is the ${comparison} of ${field}`;
+        document.getElementById('next-btn').disabled = false;
+      } else {
+        selectedOption = null;
+        document.getElementById('next-btn').disabled = true;
+      }
     }
 
     function selectOption(option, element, isOther) {
@@ -2107,26 +1899,36 @@
       let topPicks = 0;
       let totalPercent = 0;
       let gridItems = [];
+      let countedPrompts = 0;
 
       let resultsHTML = '';
 
       for (let index = 0; index < todaysPrompts.length; index++) {
         const prompt = todaysPrompts[index];
         const userAnswer = userAnswers[index].answer;
-        const isRanking = prompt.type === 'ranking';
 
-        if (isRanking) {
-          // Ranking results
+        if (prompt.type === 'madlib') {
+          // Mad lib result - just show their creation
+          resultsHTML += `
+            <div class="result-card animate-in stagger-${index + 1}">
+              <div class="result-prompt-text">Your Hot Take <span class="prompt-type-tag">CREATE</span></div>
+              <div style="margin-top: 16px; padding: 20px; background: var(--bg-elevated); border-radius: 12px; border-left: 4px solid var(--accent);">
+                <div style="font-size: 18px; font-weight: 600; color: var(--text-primary); font-style: italic;">"${userAnswer}"</div>
+              </div>
+            </div>
+          `;
+          // Don't count madlib in scoring
+          
+        } else if (prompt.type === 'ranking') {
+          // Ranking result
           const results = await DB.getResults(prompt.id);
           const userRanking = userAnswer.split('|||');
           
-          // Find most common #1 pick
-          const top1Results = results.filter(r => r.name.includes('|||'));
           let mostCommonFirst = userRanking[0];
           let matchPercent = 0;
           
+          const top1Results = results.filter(r => r.name.includes('|||'));
           if (top1Results.length > 0) {
-            // Count first-place votes
             const firstPlaceVotes = {};
             top1Results.forEach(r => {
               const first = r.name.split('|||')[0];
@@ -2142,15 +1944,21 @@
           }
           
           const userMatchedFirst = userRanking[0] === mostCommonFirst;
-          const rankingPercent = userMatchedFirst ? matchPercent : 0;
-          totalPercent += rankingPercent;
-          userPercentages.push(rankingPercent);
+          
+          if (userMatchedFirst) {
+            topPicks++;
+            gridItems.push('top1');
+            totalPercent += matchPercent;
+          } else {
+            gridItems.push('outside');
+          }
+          countedPrompts++;
 
           resultsHTML += `
             <div class="result-card animate-in stagger-${index + 1}">
               <div class="result-prompt-text">${prompt.text} <span class="prompt-type-tag">RANK</span></div>
               <div style="margin-top: 16px;">
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">YOUR RANKING</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Your Ranking</div>
                 ${userRanking.map((name, i) => `
                   <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
                     <div style="width: 24px; height: 24px; background: ${i === 0 ? 'var(--accent)' : 'var(--bg-elevated)'}; color: ${i === 0 ? 'var(--bg-primary)' : 'var(--text-muted)'}; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${i + 1}</div>
@@ -2158,7 +1966,7 @@
                   </div>
                 `).join('')}
                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
-                  <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">MOST POPULAR #1</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Most Popular #1</div>
                   <div style="font-size: 18px; font-weight: 600; color: ${userMatchedFirst ? 'var(--accent)' : 'var(--text-primary)'};">
                     ${mostCommonFirst} ${userMatchedFirst ? '<span class="you-badge">Match!</span>' : ''}
                   </div>
@@ -2166,21 +1974,9 @@
               </div>
             </div>
           `;
-        } else if (prompt.type === 'madlib') {
-          // Mad lib results - just show their answer, no comparison
-          const promptText = prompt.text.replace('_____', `<span class="blank">${userAnswer}</span>`);
           
-          resultsHTML += `
-            <div class="result-card animate-in stagger-${index + 1}">
-              <div class="result-prompt-text">${promptText} <span class="prompt-type-tag">YOUR TAKE</span></div>
-              <div style="margin-top: 16px; padding: 16px; background: var(--bg-elevated); border-radius: 10px;">
-                <div style="font-size: 18px; font-weight: 600; color: var(--accent);">"${userAnswer}"</div>
-              </div>
-            </div>
-          `;
-          // Don't add to percentages for mad libs
         } else {
-          // Fill-in-the-blank results (existing logic)
+          // Fill-in-the-blank result (original)
           const results = await DB.getResults(prompt.id);
           const top5 = results.slice(0, 5);
 
@@ -2191,7 +1987,18 @@
           const userResult = results[userRankIndex];
           const userPercent = userResult ? userResult.percent : 0;
           totalPercent += userPercent;
-          userPercentages.push(userPercent);
+          countedPrompts++;
+
+          if (userRank === 1) {
+            topPicks++;
+            gridItems.push('top1');
+          } else if (userRank <= 3) {
+            gridItems.push('top3');
+          } else if (userRank <= 5) {
+            gridItems.push('top5');
+          } else {
+            gridItems.push('outside');
+          }
 
           let displayResults = [...top5];
           if (userRank > 5 || userRank === 0) {
@@ -2238,26 +2045,31 @@
 
       resultsContainer.innerHTML = resultsHTML;
 
-      // Update share card with percentages
+      // Update share card
+      document.getElementById('share-top-picks').textContent = topPicks;
       document.getElementById('share-avg-percent').textContent =
-        Math.round(totalPercent / todaysPrompts.length) + '%';
+        countedPrompts > 0 ? Math.round(totalPercent / countedPrompts) + '%' : '0%';
 
-      // Build percentage display
-      document.getElementById('share-percentages').innerHTML = userPercentages.map(p => {
-        let className = 'share-percent-item';
-        if (p >= 40) className += ' high';
-        else if (p >= 25) className += ' medium';
-        return `<div class="${className}">${p}%</div>`;
+      document.getElementById('share-grid').innerHTML = gridItems.map(type => {
+        const icons = { top1: '🎯', top3: '🔥', top5: '✓', outside: '·' };
+        return `<div class="share-grid-item ${type}">${icons[type]}</div>`;
       }).join('');
     }
 
     function shareResults() {
+      const topPicks = document.getElementById('share-top-picks').textContent;
       const avgPercent = document.getElementById('share-avg-percent').textContent;
       const date = formatDate(new Date());
 
-      const percentString = userPercentages.map(p => `${p}%`).join(' · ');
+      const gridItems = document.querySelectorAll('.share-grid-item');
+      const grid = Array.from(gridItems).map(item => {
+        if (item.classList.contains('top1')) return '🟩';
+        if (item.classList.contains('top3')) return '🟨';
+        if (item.classList.contains('top5')) return '⬜';
+        return '⬛';
+      }).join('');
 
-      const text = `TAKES ${date}\n\n${percentString}\n\nAvg: ${avgPercent} agreement\n\nPlay at takes.game`;
+      const text = `TAKES ${date}\n\n${grid}\n\n🎯 ${topPicks} Top Picks · ${avgPercent} Match\n\nPlay at takes.game`;
 
       if (navigator.share) {
         navigator.share({ text });
@@ -2281,35 +2093,6 @@
       document.getElementById('toggle-draft').classList.toggle('active', !isActive);
     }
 
-    let newPromptType = 'fill';
-    
-    function setPromptType(type) {
-      newPromptType = type;
-      document.getElementById('toggle-fill').classList.toggle('active', type === 'fill');
-      document.getElementById('toggle-ranking').classList.toggle('active', type === 'ranking');
-      
-      // Update hints
-      const textHint = document.getElementById('prompt-text-hint');
-      const optionsLabel = document.getElementById('options-label');
-      const optionsHint = document.getElementById('options-hint');
-      const textInput = document.getElementById('prompt-text');
-      const optionsInput = document.getElementById('prompt-options');
-      
-      if (type === 'ranking') {
-        textHint.textContent = 'e.g., "Rank these athletes by career legacy"';
-        textInput.placeholder = 'Rank these athletes by career legacy';
-        optionsLabel.textContent = 'People to Rank (exactly 3)';
-        optionsHint.textContent = 'Enter exactly 3 names, one per line';
-        optionsInput.placeholder = 'LeBron James\nTom Brady\nTaylor Swift';
-      } else {
-        textHint.textContent = 'Use _____ for the blank';
-        textInput.placeholder = '_____ is the GOAT of basketball';
-        optionsLabel.textContent = 'Answer Options';
-        optionsHint.textContent = 'One option per line (7-11 recommended). "Other" added automatically.';
-        optionsInput.placeholder = 'Michael Jordan\nLeBron James\nKobe Bryant\nKareem Abdul-Jabbar';
-      }
-    }
-
     async function renderPromptList() {
       const prompts = await DB.getAllPrompts();
       const container = document.getElementById('prompt-list');
@@ -2330,7 +2113,6 @@
           <div class="prompt-list-content">
             <div class="prompt-list-meta">
               <span class="prompt-list-category">${prompt.category}</span>
-              ${prompt.type === 'ranking' ? '<span class="prompt-type-tag">RANK</span>' : ''}
               <span class="prompt-list-votes">${prompt.vote_count || 0} votes</span>
               ${prompt.is_active === false ? '<span class="prompt-list-votes">(Draft)</span>' : ''}
             </div>
@@ -2351,36 +2133,28 @@
       const category = document.getElementById('prompt-category').value;
       const text = document.getElementById('prompt-text').value.trim();
       const optionsText = document.getElementById('prompt-options').value.trim();
-      const type = newPromptType;
 
       if (!text || !optionsText) {
         showAdminMessage('Please fill in all fields', true);
         return;
       }
 
+      if (!text.includes('_____')) {
+        showAdminMessage('Prompt must include _____ for the blank', true);
+        return;
+      }
+
       const options = optionsText.split('\n').map(o => o.trim()).filter(o => o);
 
-      if (type === 'ranking') {
-        if (options.length !== 3) {
-          showAdminMessage('Ranking prompts need exactly 3 options', true);
-          return;
-        }
-      } else {
-        if (!text.includes('_____')) {
-          showAdminMessage('Prompt must include _____ for the blank', true);
-          return;
-        }
-        if (options.length < 3) {
-          showAdminMessage('Please provide at least 3 answer options', true);
-          return;
-        }
+      if (options.length < 3) {
+        showAdminMessage('Please provide at least 3 answer options', true);
+        return;
       }
 
       const { data, error } = await DB.addPrompt({
         category,
         text,
         options,
-        type: type,
         is_active: newPromptIsActive
       });
 
@@ -2507,55 +2281,11 @@
     }
 
     // ==================== INIT ====================
-    async function loadYesterdayResults() {
-      try {
-        // Get prompts that have votes
-        const prompts = await DB.getActivePrompts();
-        const promptsWithVotes = [];
-        
-        for (const prompt of prompts.slice(0, 10)) { // Check first 10
-          if (prompt.type === 'ranking') continue; // Skip rankings for now
-          const results = await DB.getResults(prompt.id);
-          if (results.length > 0 && results[0].count > 0) {
-            promptsWithVotes.push({
-              prompt,
-              topAnswer: results[0].name,
-              topPercent: results[0].percent
-            });
-          }
-        }
-        
-        if (promptsWithVotes.length === 0) return;
-        
-        // Show up to 3 results
-        const toShow = promptsWithVotes.slice(0, 3);
-        const container = document.getElementById('yesterday-content');
-        
-        container.innerHTML = toShow.map(item => {
-          const shortQuestion = item.prompt.text.replace('_____', '___').substring(0, 50) + (item.prompt.text.length > 50 ? '...' : '');
-          return `
-            <div class="yesterday-item">
-              <div class="yesterday-question">${shortQuestion}</div>
-              <div class="yesterday-answer">
-                ${item.topAnswer}
-                <span class="yesterday-percent">${item.topPercent}%</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-        
-        document.getElementById('yesterday-results').style.display = 'block';
-      } catch (e) {
-        console.log('Could not load yesterday results:', e);
-      }
-    }
-
     async function init() {
       await DB.init();
       await seedInitialData();
       updateDates();
       await updateStats();
-      await loadYesterdayResults();
       showScreen('start-screen');
     }
 
