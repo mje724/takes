@@ -961,25 +961,9 @@
         <p class="hero-tagline">Daily sports & culture opinions.<br>See where you stand.</p>
       </div>
 
-      <div class="categories-grid">
-        <div class="category-chip">NFL</div>
-        <div class="category-chip">NBA</div>
-        <div class="category-chip">NHL</div>
-        <div class="category-chip">MLB</div>
-        <div class="category-chip">Soccer</div>
-        <div class="category-chip">Film/TV</div>
-        <div class="category-chip">Musicians</div>
-      </div>
+      <button class="btn btn-primary" onclick="startGame()">Play</button>
 
-      <div class="today-card">
-        <div class="today-label">Today's Takes</div>
-        <div class="today-theme" id="today-theme">Loading...</div>
-        <div class="today-meta"><span id="prompt-count">5</span> questions • <span id="total-votes">0</span> takes so far</div>
-      </div>
-
-      <button class="btn btn-primary" onclick="startGame()">Play Today's Takes</button>
-
-      <div class="play-count">Come back tomorrow for new takes</div>
+      <div class="play-count"><span id="total-votes">0</span> takes today</div>
     </div>
 
     <!-- Game Screen -->
