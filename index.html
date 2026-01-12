@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TAKES - Daily Sports & Culture Opinions</title>
+  <meta name="description" content="Daily sports and culture opinion game. Fill in the blanks, see where you stand.">
+  <meta property="og:title" content="TAKES - Daily Sports & Culture Opinions">
+  <meta property="og:description" content="Fill in the blanks. See where you stand.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-primary: #050505;
+      --bg-secondary: #0d0d0d;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --accent: #c8ff00;
+      --accent-dim: #a3cc00;
+      --text-primary: #ffffff;
+      --text-secondary: #888888;
+      --text-muted: #444444;
+      --border: #222222;
+      --success: #00ff88;
+      --warning: #ffaa00;
+      --error: #ff4444;
+      --category-nfl: #013369;
+      --category-nba: #c9082a;
+      --category-nhl: #000000;
+      --category-mlb: #002d72;
+      --category-soccer: #00ff85;
+      --category-actors: #ff2d55;
+      --category-musicians: #af52de;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      color: var(--accent);
+    }
+
+    .logo-small {
+      font-size: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .header-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .admin-link {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .admin-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Loading State */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 20px;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--bg-elevated);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Start Screen */
+    .start-screen {
+      display: none;
+      padding: 40px 0;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: -6px;
+      color: var(--accent);
+      margin-bottom: 16px;
+      text-shadow: 0 0 60px rgba(200, 255, 0, 0.3);
+    }
+
+    .hero-tagline {
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .category-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .category-chip:nth-child(7) {
+      grid-column: 2 / 4;
+    }
+
+    .today-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .today-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .today-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .today-theme {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .today-meta {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .today-meta span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 18px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(200, 255, 0, 0.2);
+    }
+
+    .btn-primary:disabled {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+    }
+
+    .play-count {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Game Screen */
+    .game-screen {
+      display: none;
+    }
+
+    .progress-container {
+      margin-bottom: 32px;
+    }
+
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .progress-segment {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .progress-segment.completed .progress-fill {
+      width: 100%;
+    }
+
+    .progress-segment.current .progress-fill {
+      width: 50%;
+      background: var(--text-muted);
+    }
+
+    .progress-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .prompt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-category {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-category.nfl { background: var(--category-nfl); }
+    .prompt-category.nba { background: var(--category-nba); }
+    .prompt-category.nhl { background: var(--category-nhl); border: 1px solid var(--border); }
+    .prompt-category.mlb { background: var(--category-mlb); }
+    .prompt-category.soccer { background: var(--category-soccer); color: #000; }
+    .prompt-category.actors { background: var(--category-actors); }
+    .prompt-category.musicians { background: var(--category-musicians); }
+
+    .prompt-text {
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 28px;
+    }
+
+    .prompt-blank {
+      color: var(--accent);
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 2px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .option-btn.selected {
+      border-color: var(--accent);
+      background: rgba(200, 255, 0, 0.08);
+    }
+
+    .option-btn.other {
+      border-style: dashed;
+      color: var(--text-secondary);
+    }
+
+    .option-btn.other.selected {
+      border-style: solid;
+    }
+
+    .option-letter {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .option-btn.selected .option-letter {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .other-input-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .other-input-container.visible {
+      display: block;
+    }
+
+    .other-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .other-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Results Screen */
+    .results-screen {
+      display: none;
+    }
+
+    .results-header {
+      text-align: center;
+      padding: 32px 0;
+    }
+
+    .results-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .results-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .results-subtitle span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .result-prompt-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .result-prompt-text .blank {
+      color: var(--accent);
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-rank {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .result-item.user-pick .result-rank {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .result-bar-wrapper {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-bar-bg {
+      height: 36px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .result-bar-fill {
+      height: 100%;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding-left: 14px;
+      min-width: fit-content;
+      transition: width 0.6s ease-out;
+    }
+
+    .result-item.user-pick .result-bar-fill {
+      background: rgba(200, 255, 0, 0.15);
+    }
+
+    .result-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .you-badge {
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-percent {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--text-muted);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .result-item.user-pick .result-percent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .share-card {
+      background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin: 32px 0;
+      text-align: center;
+    }
+
+    .share-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+
+    .share-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .share-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-bottom: 28px;
+    }
+
+    .share-stat-value {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .share-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .share-grid {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .share-grid-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .share-grid-item.top1 { background: var(--accent); }
+    .share-grid-item.top3 { background: var(--warning); }
+    .share-grid-item.top5 { background: var(--text-muted); }
+    .share-grid-item.outside { background: var(--bg-elevated); }
+
+    .share-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-share {
+      background: var(--text-primary);
+      color: var(--bg-primary);
+    }
+
+    .btn-share:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Admin Screen */
+    .admin-screen {
+      display: none;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .admin-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .back-link {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    .admin-section {
+      margin-bottom: 40px;
+    }
+
+    .admin-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .prompt-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .prompt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .prompt-list-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .prompt-list-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .prompt-list-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .prompt-list-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .prompt-list-votes {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .prompt-list-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prompt-list-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-elevated);
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-icon.delete:hover {
+      background: #3d1515;
+      color: #ff4444;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .error-message {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .success-message {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.15s; }
+    .stagger-4 { animation-delay: 0.2s; }
+    .stagger-5 { animation-delay: 0.25s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loader"></div>
+      <div class="loading-text">Loading today's takes...</div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="start-screen">
+      <div class="header">
+        <span class="header-date" id="header-date"></span>
+        <a href="#" class="admin-link" onclick="showAdmin(event)">Admin</a>
+      </div>
+
+      <div class="hero">
+        <div class="hero-logo">TAKES</div>
+        <p class="hero-tagline">Daily sports & culture opinions.<br>See where you stand.</p>
+      </div>
+
+      <div class="categories-grid">
+        <div class="category-chip">NFL</div>
+        <div class="category-chip">NBA</div>
+        <div class="category-chip">NHL</div>
+        <div class="category-chip">MLB</div>
+        <div class="category-chip">Soccer</div>
+        <div class="category-chip">Film/TV</div>
+        <div class="category-chip">Musicians</div>
+      </div>
+
+      <div class="today-card">
+        <div class="today-label">Today's Takes</div>
+        <div class="today-theme" id="today-theme">Loading...</div>
+        <div class="today-meta"><span id="prompt-count">5</span> questions • <span id="total-votes">0</span> takes so far</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="startGame()">Play Today's Takes</button>
+
+      <div class="play-count">Come back tomorrow for new takes</div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="game-screen">
+      <div class="header">
+        <div class="logo logo-small">TAKES</div>
+        <span class="header-date" id="game-date"></span>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-text" id="progress-text">1 of 5</div>
+      </div>
+
+      <div id="prompt-container"></div>
+
+      <button class="btn btn-primary" id="next-btn" onclick="nextPrompt()" disabled>Next</button>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="results-screen">
+      <div class="header">
+        <div class="logo logo-small">TAKES</div>
+        <span class="header-date" id="results-date"></span>
+      </div>
+
+      <div class="results-header">
+        <div class="results-title">Your Takes Are In</div>
+        <div class="results-subtitle">Compared against <span id="results-total">0</span> others</div>
+      </div>
+
+      <div id="results-container"></div>
+
+      <div class="share-card">
+        <div class="share-logo">TAKES</div>
+        <div class="share-date" id="share-date"></div>
+        <div class="share-stats">
+          <div class="share-stat">
+            <div class="share-stat-value" id="share-top-picks">0</div>
+            <div class="share-stat-label">Top Picks</div>
+          </div>
+          <div class="share-stat">
+            <div class="share-stat-value" id="share-avg-percent">0%</div>
+            <div class="share-stat-label">Avg Match</div>
+          </div>
+        </div>
+        <div class="share-grid" id="share-grid"></div>
+        <div class="share-buttons">
+          <button class="btn btn-share" onclick="shareResults()">Share Results</button>
+          <button class="btn btn-secondary" onclick="playAgain()">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Screen -->
+    <div id="admin-screen" class="admin-screen">
+      <div class="admin-header">
+        <div class="admin-title">Admin</div>
+        <a href="#" class="back-link" onclick="hideAdmin(event)">← Back to game</a>
+      </div>
+
+      <div id="admin-message"></div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Add New Prompt</div>
+        <div class="prompt-form">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="prompt-category">
+              <option value="NFL">NFL</option>
+              <option value="NBA">NBA</option>
+              <option value="NHL">NHL</option>
+              <option value="MLB">MLB</option>
+              <option value="Soccer">Soccer</option>
+              <option value="Actors">Actors/Actresses</option>
+              <option value="Musicians">Musicians</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prompt Text</label>
+            <input type="text" class="form-input" id="prompt-text" placeholder="_____ is the GOAT of basketball">
+            <div class="form-hint">Use _____ for the blank</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Answer Options</label>
+            <textarea class="form-textarea" id="prompt-options" placeholder="Michael Jordan&#10;LeBron James&#10;Kobe Bryant&#10;Kareem Abdul-Jabbar"></textarea>
+            <div class="form-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn active" id="toggle-active" onclick="setPromptStatus(true)">Active</button>
+              <button type="button" class="toggle-btn" id="toggle-draft" onclick="setPromptStatus(false)">Draft</button>
+            </div>
+            <div class="form-hint">Draft prompts won't appear in the game</div>
+          </div>
+          <button class="btn btn-primary" onclick="addPrompt()">Add Prompt</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Prompt Bank (<span id="prompt-list-count">0</span>)</div>
+        <div class="prompt-list" id="prompt-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== CONFIG ====================
+    // IMPORTANT: Replace these with your Supabase credentials
+    const SUPABASE_URL = https://tkkvlkexggzthctwemnr.supabase.co;
+    const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRra3Zsa2V4Z2d6dGhjdHdlbW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDIyODQsImV4cCI6MjA4MzgxODI4NH0.-YwHTbGiwJfefq-B75whfeCN-Exxi9buKxj0YcgCMWY;
+
+    // Initialize Supabase client
+    let supabase;
+    let dbReady = false;
+
+    // ==================== DATABASE LAYER ====================
+    const DB = {
+      init: async () => {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+          console.log('Supabase not configured, using localStorage fallback');
+          dbReady = true;
+          return;
+        }
+        
+        try {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          dbReady = true;
+        } catch (error) {
+          console.error('Supabase init error:', error);
+          dbReady = true; // Fall back to localStorage
+        }
+      },
+
+      // Get active prompts for today's game
+      getActivePrompts: async () => {
+        if (!supabase) {
+          // localStorage fallback
+          const data = localStorage.getItem('takes_prompts');
+          const prompts = data ? JSON.parse(data) : [];
+          return prompts.filter(p => p.is_active !== false).slice(0, 5);
+        }
+
+        const { data, error } = await supabase
+          .from('prompts')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) {
+          console.error('Error fetching prompts:', error);
+          return [];
+        }
+        return data || [];
+      },
+
+      // Get all prompts for admin
+      getAllPrompts: async () => {
+        if (!supabase) {
+          const data = localStorage.getItem('takes_prompts');
+          return data ? JSON.parse(data) : [];
+        }
+
+        const { data, error } = await supabase
+          .from('prompts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching prompts:', error);
+          return [];
+        }
+        return data || [];
+      },
+
+      // Add a new prompt
+      addPrompt: async (prompt) => {
+        if (!supabase) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          prompt.id = Date.now();
+          prompt.created_at = new Date().toISOString();
+          prompt.vote_count = 0;
+          prompts.unshift(prompt);
+          localStorage.setItem('takes_prompts', JSON.stringify(prompts));
+          return { data: prompt, error: null };
+        }
+
+        const { data, error } = await supabase
+          .from('prompts')
+          .insert([{
+            category: prompt.category,
+            text: prompt.text,
+            options: prompt.options,
+            is_active: prompt.is_active
+          }])
+          .select()
+          .single();
+
+        return { data, error };
+      },
+
+      // Delete a prompt
+      deletePrompt: async (id) => {
+        if (!supabase) {
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const filtered = prompts.filter(p => p.id !== id);
+          localStorage.setItem('takes_prompts', JSON.stringify(filtered));
+          return { error: null };
+        }
+
+        const { error } = await supabase
+          .from('prompts')
+          .delete()
+          .eq('id', id);
+
+        return { error };
+      },
+
+      // Record a vote
+      recordVote: async (promptId, answer, isOther = false) => {
+        if (!supabase) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const prompt = prompts.find(p => p.id === promptId);
+          if (prompt) {
+            if (!prompt.votes) prompt.votes = {};
+            const key = answer.toLowerCase().trim();
+            prompt.votes[key] = (prompt.votes[key] || 0) + 1;
+            if (!prompt.vote_display) prompt.vote_display = {};
+            prompt.vote_display[key] = answer;
+            prompt.vote_count = (prompt.vote_count || 0) + 1;
+            localStorage.setItem('takes_prompts', JSON.stringify(prompts));
+          }
+          return { error: null };
+        }
+
+        // Insert vote record
+        const { error: voteError } = await supabase
+          .from('votes')
+          .insert([{
+            prompt_id: promptId,
+            answer: answer,
+            is_other: isOther
+          }]);
+
+        if (voteError) {
+          console.error('Error recording vote:', voteError);
+        }
+
+        // Increment prompt vote count
+        await supabase.rpc('increment_vote_count', { prompt_id: promptId });
+
+        return { error: voteError };
+      },
+
+      // Get results for a prompt
+      getResults: async (promptId) => {
+        if (!supabase) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const prompt = prompts.find(p => p.id === promptId);
+          if (!prompt || !prompt.votes) return [];
+
+          const total = Object.values(prompt.votes).reduce((sum, v) => sum + v, 0) || 1;
+          return Object.entries(prompt.votes)
+            .map(([key, count]) => ({
+              name: prompt.vote_display?.[key] || key,
+              count,
+              percent: Math.round((count / total) * 100)
+            }))
+            .sort((a, b) => b.count - a.count);
+        }
+
+        const { data, error } = await supabase
+          .from('votes')
+          .select('answer')
+          .eq('prompt_id', promptId);
+
+        if (error || !data) return [];
+
+        // Count votes
+        const counts = {};
+        data.forEach(vote => {
+          const key = vote.answer.toLowerCase().trim();
+          counts[key] = counts[key] || { name: vote.answer, count: 0 };
+          counts[key].count++;
+        });
+
+        const total = data.length || 1;
+        return Object.values(counts)
+          .map(item => ({
+            ...item,
+            percent: Math.round((item.count / total) * 100)
+          }))
+          .sort((a, b) => b.count - a.count);
+      },
+
+      // Get total vote count
+      getTotalVotes: async () => {
+        if (!supabase) {
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          return prompts.reduce((sum, p) => sum + (p.vote_count || 0), 0);
+        }
+
+        const { count, error } = await supabase
+          .from('votes')
+          .select('*', { count: 'exact', head: true });
+
+        return count || 0;
+      },
+
+      // Check if played today (always localStorage)
+      hasPlayedToday: () => {
+        const lastPlayed = localStorage.getItem('takes_last_played');
+        if (!lastPlayed) return false;
+        return lastPlayed === new Date().toDateString();
+      },
+
+      markPlayed: () => {
+        localStorage.setItem('takes_last_played', new Date().toDateString());
+      },
+
+      resetPlayStatus: () => {
+        localStorage.removeItem('takes_last_played');
+      }
+    };
+
+    // ==================== GAME STATE ====================
+    let currentPromptIndex = 0;
+    let userAnswers = [];
+    let selectedOption = null;
+    let isOtherSelected = false;
+    let todaysPrompts = [];
+    let newPromptIsActive = true;
+
+    // ==================== UI HELPERS ====================
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function updateDates() {
+      const today = formatDate(new Date());
+      document.querySelectorAll('.header-date, #game-date, #results-date, #share-date').forEach(el => {
+        el.textContent = today;
+      });
+    }
+
+    async function updateStats() {
+      const prompts = await DB.getActivePrompts();
+      const totalVotes = await DB.getTotalVotes();
+      
+      document.getElementById('prompt-count').textContent = prompts.length;
+      document.getElementById('total-votes').textContent = totalVotes.toLocaleString();
+      
+      // Set theme based on categories
+      const categories = [...new Set(prompts.map(p => p.category))];
+      const theme = categories.length === 1 ? `${categories[0]} Edition` : 'Mixed Edition';
+      document.getElementById('today-theme').textContent = theme;
+    }
+
+    function showScreen(screenId) {
+      ['loading-screen', 'start-screen', 'game-screen', 'results-screen', 'admin-screen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      document.getElementById(screenId).style.display = 'block';
+    }
+
+    function showAdminMessage(message, isError = false) {
+      const container = document.getElementById('admin-message');
+      container.innerHTML = `<div class="${isError ? 'error-message' : 'success-message'}">${message}</div>`;
+      setTimeout(() => { container.innerHTML = ''; }, 3000);
+    }
+
+    // ==================== SCREENS ====================
+    async function showAdmin(e) {
+      e.preventDefault();
+      showScreen('admin-screen');
+      await renderPromptList();
+    }
+
+    async function hideAdmin(e) {
+      e.preventDefault();
+      showScreen('start-screen');
+      await updateStats();
+    }
+
+    // ==================== GAME FLOW ====================
+    async function startGame() {
+      todaysPrompts = await DB.getActivePrompts();
+      
+      if (todaysPrompts.length === 0) {
+        alert('No prompts available. Add some in the admin panel!');
+        return;
+      }
+
+      currentPromptIndex = 0;
+      userAnswers = [];
+      
+      showScreen('game-screen');
+      renderProgress();
+      renderPrompt();
+    }
+
+    function renderProgress() {
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.innerHTML = todaysPrompts.map((_, i) => {
+        let className = 'progress-segment';
+        if (i < currentPromptIndex) className += ' completed';
+        else if (i === currentPromptIndex) className += ' current';
+        return `<div class="${className}"><div class="progress-fill"></div></div>`;
+      }).join('');
+
+      document.getElementById('progress-text').textContent =
+        `${currentPromptIndex + 1} of ${todaysPrompts.length}`;
+    }
+
+    function renderPrompt() {
+      const prompt = todaysPrompts[currentPromptIndex];
+      const container = document.getElementById('prompt-container');
+      const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
+
+      const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+      container.innerHTML = `
+        <div class="prompt-card animate-in">
+          <span class="prompt-category ${prompt.category.toLowerCase()}">${prompt.category}</span>
+          <div class="prompt-text">${promptText}</div>
+          <div class="options-list">
+            ${options.map((option, i) => `
+              <button class="option-btn" onclick="selectOption('${option.replace(/'/g, "\\'")}', this, false)">
+                <span class="option-letter">${letters[i]}</span>
+                ${option}
+              </button>
+            `).join('')}
+            <button class="option-btn other" onclick="selectOther(this)">
+              <span class="option-letter">?</span>
+              Other...
+            </button>
+          </div>
+          <div class="other-input-container" id="other-input-container">
+            <input type="text" class="other-input" id="other-input" placeholder="Type your answer..." onkeyup="handleOtherInput(event)">
+          </div>
+        </div>
+      `;
+
+      selectedOption = null;
+      isOtherSelected = false;
+      document.getElementById('next-btn').disabled = true;
+      document.getElementById('next-btn').textContent =
+        currentPromptIndex === todaysPrompts.length - 1 ? 'See Results' : 'Next';
+    }
+
+    function selectOption(option, element, isOther) {
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      document.getElementById('other-input-container').classList.remove('visible');
+
+      selectedOption = option;
+      isOtherSelected = isOther;
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function selectOther(element) {
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      document.getElementById('other-input-container').classList.add('visible');
+      document.getElementById('other-input').focus();
+
+      isOtherSelected = true;
+      selectedOption = '';
+      document.getElementById('next-btn').disabled = true;
+    }
+
+    function handleOtherInput(e) {
+      const value = e.target.value.trim();
+      selectedOption = value;
+      document.getElementById('next-btn').disabled = value.length === 0;
+      
+      if (e.key === 'Enter' && value.length > 0) {
+        nextPrompt();
+      }
+    }
+
+    async function nextPrompt() {
+      if (!selectedOption) return;
+
+      const prompt = todaysPrompts[currentPromptIndex];
+      
+      // Record vote
+      await DB.recordVote(prompt.id, selectedOption, isOtherSelected);
+
+      userAnswers.push({
+        promptId: prompt.id,
+        answer: selectedOption,
+        isOther: isOtherSelected
+      });
+
+      currentPromptIndex++;
+
+      if (currentPromptIndex >= todaysPrompts.length) {
+        DB.markPlayed();
+        await showResults();
+      } else {
+        renderProgress();
+        renderPrompt();
+      }
+    }
+
+    async function showResults() {
+      showScreen('results-screen');
+
+      const totalVotes = await DB.getTotalVotes();
+      document.getElementById('results-total').textContent = totalVotes.toLocaleString();
+
+      const resultsContainer = document.getElementById('results-container');
+      let topPicks = 0;
+      let totalPercent = 0;
+      let gridItems = [];
+
+      let resultsHTML = '';
+
+      for (let index = 0; index < todaysPrompts.length; index++) {
+        const prompt = todaysPrompts[index];
+        const userAnswer = userAnswers[index].answer;
+        const results = await DB.getResults(prompt.id);
+        const top5 = results.slice(0, 5);
+
+        const userRankIndex = results.findIndex(r =>
+          r.name.toLowerCase() === userAnswer.toLowerCase()
+        );
+        const userRank = userRankIndex + 1;
+        const userResult = results[userRankIndex];
+        const userPercent = userResult ? userResult.percent : 0;
+        totalPercent += userPercent;
+
+        if (userRank === 1) {
+          topPicks++;
+          gridItems.push('top1');
+        } else if (userRank <= 3) {
+          gridItems.push('top3');
+        } else if (userRank <= 5) {
+          gridItems.push('top5');
+        } else {
+          gridItems.push('outside');
+        }
+
+        let displayResults = [...top5];
+        if (userRank > 5 || userRank === 0) {
+          displayResults.push({
+            name: userAnswer,
+            percent: userPercent,
+            isUserOnly: true
+          });
+        }
+
+        const promptText = prompt.text.replace('_____', '<span class="blank">[blank]</span>');
+
+        resultsHTML += `
+          <div class="result-card animate-in stagger-${index + 1}">
+            <div class="result-prompt-text">${promptText}</div>
+            <div class="result-items">
+              ${displayResults.map((result, i) => {
+                const isUserPick = result.name.toLowerCase() === userAnswer.toLowerCase();
+                const rank = results.findIndex(r => r.name.toLowerCase() === result.name.toLowerCase()) + 1;
+                const displayRank = rank > 0 && rank <= 5 ? rank : '—';
+
+                return `
+                  <div class="result-item ${isUserPick ? 'user-pick' : ''}">
+                    <div class="result-rank">${displayRank}</div>
+                    <div class="result-bar-wrapper">
+                      <div class="result-bar-bg">
+                        <div class="result-bar-fill" style="width: ${Math.max(result.percent, 15)}%">
+                          <span class="result-name">
+                            ${result.name}
+                            ${isUserPick ? '<span class="you-badge">You</span>' : ''}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span class="result-percent">${result.percent}%</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      resultsContainer.innerHTML = resultsHTML;
+
+      // Update share card
+      document.getElementById('share-top-picks').textContent = topPicks;
+      document.getElementById('share-avg-percent').textContent =
+        Math.round(totalPercent / todaysPrompts.length) + '%';
+
+      document.getElementById('share-grid').innerHTML = gridItems.map(type => {
+        const icons = { top1: '🎯', top3: '🔥', top5: '✓', outside: '·' };
+        return `<div class="share-grid-item ${type}">${icons[type]}</div>`;
+      }).join('');
+    }
+
+    function shareResults() {
+      const topPicks = document.getElementById('share-top-picks').textContent;
+      const avgPercent = document.getElementById('share-avg-percent').textContent;
+      const date = formatDate(new Date());
+
+      const gridItems = document.querySelectorAll('.share-grid-item');
+      const grid = Array.from(gridItems).map(item => {
+        if (item.classList.contains('top1')) return '🟩';
+        if (item.classList.contains('top3')) return '🟨';
+        if (item.classList.contains('top5')) return '⬜';
+        return '⬛';
+      }).join('');
+
+      const text = `TAKES ${date}\n\n${grid}\n\n🎯 ${topPicks} Top Picks · ${avgPercent} Match\n\nPlay at takes.game`;
+
+      if (navigator.share) {
+        navigator.share({ text });
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Copied to clipboard!');
+        });
+      }
+    }
+
+    async function playAgain() {
+      DB.resetPlayStatus();
+      showScreen('start-screen');
+      await updateStats();
+    }
+
+    // ==================== ADMIN ====================
+    function setPromptStatus(isActive) {
+      newPromptIsActive = isActive;
+      document.getElementById('toggle-active').classList.toggle('active', isActive);
+      document.getElementById('toggle-draft').classList.toggle('active', !isActive);
+    }
+
+    async function renderPromptList() {
+      const prompts = await DB.getAllPrompts();
+      const container = document.getElementById('prompt-list');
+      document.getElementById('prompt-list-count').textContent = prompts.length;
+
+      if (prompts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <div>No prompts yet. Add your first one above!</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = prompts.map(prompt => `
+        <div class="prompt-list-item">
+          <div class="prompt-list-content">
+            <div class="prompt-list-meta">
+              <span class="prompt-list-category">${prompt.category}</span>
+              <span class="prompt-list-votes">${prompt.vote_count || 0} votes</span>
+              ${prompt.is_active === false ? '<span class="prompt-list-votes">(Draft)</span>' : ''}
+            </div>
+            <div class="prompt-list-text">${prompt.text}</div>
+          </div>
+          <div class="prompt-list-actions">
+            <button class="btn-icon delete" onclick="deletePrompt(${prompt.id})" title="Delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function addPrompt() {
+      const category = document.getElementById('prompt-category').value;
+      const text = document.getElementById('prompt-text').value.trim();
+      const optionsText = document.getElementById('prompt-options').value.trim();
+
+      if (!text || !optionsText) {
+        showAdminMessage('Please fill in all fields', true);
+        return;
+      }
+
+      if (!text.includes('_____')) {
+        showAdminMessage('Prompt must include _____ for the blank', true);
+        return;
+      }
+
+      const options = optionsText.split('\n').map(o => o.trim()).filter(o => o);
+
+      if (options.length < 3) {
+        showAdminMessage('Please provide at least 3 answer options', true);
+        return;
+      }
+
+      const { data, error } = await DB.addPrompt({
+        category,
+        text,
+        options,
+        is_active: newPromptIsActive
+      });
+
+      if (error) {
+        showAdminMessage('Error adding prompt: ' + error.message, true);
+        return;
+      }
+
+      // Clear form
+      document.getElementById('prompt-text').value = '';
+      document.getElementById('prompt-options').value = '';
+      
+      showAdminMessage('Prompt added successfully!');
+      await renderPromptList();
+    }
+
+    async function deletePrompt(id) {
+      if (!confirm('Delete this prompt? This cannot be undone.')) return;
+
+      const { error } = await DB.deletePrompt(id);
+      
+      if (error) {
+        showAdminMessage('Error deleting prompt: ' + error.message, true);
+        return;
+      }
+
+      showAdminMessage('Prompt deleted');
+      await renderPromptList();
+    }
+
+    // ==================== SEED DATA ====================
+    async function seedInitialData() {
+      const prompts = await DB.getAllPrompts();
+      if (prompts.length > 0) return;
+
+      const seedPrompts = [
+        {
+          category: "NBA",
+          text: "_____ is the Tony Romo of the NBA",
+          options: ["Joel Embiid", "Chris Paul", "James Harden", "Patrick Ewing", "Carmelo Anthony", "Damian Lillard", "Karl Malone", "Charles Barkley"],
+          is_active: true
+        },
+        {
+          category: "NBA",
+          text: "The most overrated player in the NBA right now is _____",
+          options: ["Zion Williamson", "Trae Young", "Ben Simmons", "Draymond Green", "Paul George", "Russell Westbrook", "Jayson Tatum", "Kyrie Irving"],
+          is_active: true
+        },
+        {
+          category: "NFL",
+          text: "The NFL team most likely to move cities in the next 10 years is _____",
+          options: ["Jacksonville Jaguars", "Cincinnati Bengals", "Tennessee Titans", "New Orleans Saints", "Carolina Panthers", "Arizona Cardinals", "Miami Dolphins", "Buffalo Bills"],
+          is_active: true
+        },
+        {
+          category: "Musicians",
+          text: "_____ is the most overrated artist of the last decade",
+          options: ["Drake", "Taylor Swift", "Ed Sheeran", "Post Malone", "Billie Eilish", "The Weeknd", "Harry Styles", "Dua Lipa"],
+          is_active: true
+        },
+        {
+          category: "Actors",
+          text: "_____ should have won an Oscar by now",
+          options: ["Adam Sandler", "Tom Cruise", "Jake Gyllenhaal", "Amy Adams", "Glenn Close", "Robert Downey Jr.", "Samuel L. Jackson", "Jim Carrey"],
+          is_active: true
+        }
+      ];
+
+      for (const prompt of seedPrompts) {
+        await DB.addPrompt(prompt);
+      }
+    }
+
+    // ==================== INIT ====================
+    async function init() {
+      await DB.init();
+      await seedInitialData();
+      updateDates();
+      await updateStats();
+      showScreen('start-screen');
+    }
+
+    init();
+  </script>
+</body>
+</html>
