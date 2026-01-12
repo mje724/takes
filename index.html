@@ -3,181 +3,2280 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co;">
-  <title>TAKES - Daily Sports & Culture</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>TAKES - Daily Sports & Culture Opinions</title>
+  <meta name="description" content="Daily sports and culture opinion game. Fill in the blanks, see where you stand.">
+  <meta property="og:title" content="TAKES - Daily Sports & Culture Opinions">
+  <meta property="og:description" content="Fill in the blanks. See where you stand.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-primary: #050505; --bg-secondary: #0d0d0d; --bg-card: #111111;
-      --accent: #c8ff00; --text-primary: #ffffff; --text-secondary: #888888; --border: #222222;
+      --bg-primary: #050505;
+      --bg-secondary: #0d0d0d;
+      --bg-card: #111111;
+      --bg-elevated: #1a1a1a;
+      --accent: #c8ff00;
+      --accent-dim: #a3cc00;
+      --text-primary: #ffffff;
+      --text-secondary: #888888;
+      --text-muted: #444444;
+      --border: #222222;
+      --success: #00ff88;
+      --warning: #ffaa00;
+      --error: #ff4444;
+      --category-nfl: #013369;
+      --category-nba: #c9082a;
+      --category-nhl: #000000;
+      --category-mlb: #002d72;
+      --category-soccer: #00ff85;
+      --category-actors: #ff2d55;
+      --category-musicians: #af52de;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
-    .container { max-width: 480px; margin: 0 auto; padding: 16px; position: relative; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-    .logo { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -2px; color: var(--accent); }
-    .header-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
-    .btn { width: 100%; padding: 18px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
-    .btn-primary { background: var(--accent); color: var(--bg-primary); }
-    .btn-primary:disabled { background: #1a1a1a; color: #444; cursor: not-allowed; }
-    .prompt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; margin-bottom: 20px; }
-    .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; background: #1a1a1a; color: var(--accent); margin-bottom: 15px; display: inline-block; }
-    .prompt-text { font-size: 26px; font-weight: 600; line-height: 1.35; margin-bottom: 28px; }
-    .option-btn { width: 100%; text-align: left; padding: 16px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: #fff; margin-bottom: 10px; cursor: pointer; }
-    .option-btn.selected { border-color: var(--accent); background: rgba(200,255,0,0.1); }
-    .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; }
-    .ranking-num { width: 28px; height: 28px; background: var(--accent); color: #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .progress-bar { display: flex; gap: 6px; margin-bottom: 20px; }
-    .progress-seg { flex: 1; height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s; }
-    .screen { display: none; }
-    .admin-section { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
-    textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #0f0; padding: 10px; font-family: 'Space Mono'; margin-bottom: 10px; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      position: relative;
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -2px;
+      color: var(--accent);
+    }
+
+    .logo-small {
+      font-size: 20px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .header-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .admin-link {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .admin-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Loading State */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 20px;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--bg-elevated);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Start Screen */
+    .start-screen {
+      display: none;
+      padding: 40px 0;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 72px;
+      font-weight: 700;
+      letter-spacing: -6px;
+      color: var(--accent);
+      margin-bottom: 16px;
+      text-shadow: 0 0 60px rgba(200, 255, 0, 0.3);
+    }
+
+    .hero-tagline {
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .category-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .category-chip:nth-child(7) {
+      grid-column: 2 / 4;
+    }
+
+    .today-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .today-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent);
+    }
+
+    .today-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .today-theme {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .today-meta {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .today-meta span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 18px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(200, 255, 0, 0.2);
+    }
+
+    .btn-primary:disabled {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+    }
+
+    .play-count {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Game Screen */
+    .game-screen {
+      display: none;
+    }
+
+    .progress-container {
+      margin-bottom: 32px;
+    }
+
+    .progress-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .progress-segment {
+      flex: 1;
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .progress-segment.completed .progress-fill {
+      width: 100%;
+    }
+
+    .progress-segment.current .progress-fill {
+      width: 50%;
+      background: var(--text-muted);
+    }
+
+    .progress-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .prompt-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-category {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .prompt-category.nfl { background: var(--category-nfl); }
+    .prompt-category.nba { background: var(--category-nba); }
+    .prompt-category.nhl { background: var(--category-nhl); border: 1px solid var(--border); }
+    .prompt-category.mlb { background: var(--category-mlb); }
+    .prompt-category.soccer { background: var(--category-soccer); color: #000; }
+    .prompt-category.actors { background: var(--category-actors); }
+    .prompt-category.musicians { background: var(--category-musicians); }
+
+    .prompt-text {
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 28px;
+    }
+
+    .prompt-blank {
+      color: var(--accent);
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 2px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .option-btn.selected {
+      border-color: var(--accent);
+      background: rgba(200, 255, 0, 0.08);
+    }
+
+    .option-btn.other {
+      border-style: dashed;
+      color: var(--text-secondary);
+    }
+
+    .option-btn.other.selected {
+      border-style: solid;
+    }
+
+    .option-letter {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .option-btn.selected .option-letter {
+      background: var(--accent);
+      color: var(--bg-primary);
+
+    /* Ranking UI */
+    .ranking-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ranking-item {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: grab;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .ranking-item:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .ranking-item.dragging {
+      opacity: 0.5;
+      border-color: var(--accent);
+    }
+
+    .ranking-item.drag-over {
+      border-color: var(--accent);
+      background: rgba(200, 255, 0, 0.08);
+    }
+
+    .ranking-position {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .ranking-item:nth-child(1) .ranking-position {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .ranking-item:nth-child(2) .ranking-position {
+      background: var(--text-secondary);
+      color: var(--bg-primary);
+    }
+
+    .ranking-item:nth-child(3) .ranking-position {
+      background: var(--text-muted);
+      color: var(--bg-primary);
+    }
+
+    .ranking-name {
+      font-size: 18px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .ranking-handle {
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    .ranking-hint {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .prompt-type-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    }
+
+    .other-input-container {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .other-input-container.visible {
+      display: block;
+    }
+
+    .other-input {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .other-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Results Screen */
+    .results-screen {
+      display: none;
+    }
+
+    .results-header {
+      text-align: center;
+      padding: 32px 0;
+    }
+
+    .results-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .results-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .results-subtitle span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .result-prompt-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .result-prompt-text .blank {
+      color: var(--accent);
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-rank {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .result-item.user-pick .result-rank {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .result-bar-wrapper {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-bar-bg {
+      height: 36px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .result-bar-fill {
+      height: 100%;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding-left: 14px;
+      min-width: fit-content;
+      transition: width 0.6s ease-out;
+    }
+
+    .result-item.user-pick .result-bar-fill {
+      background: rgba(200, 255, 0, 0.15);
+    }
+
+    .result-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .you-badge {
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-percent {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--text-muted);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .result-item.user-pick .result-percent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .share-card {
+      background: linear-gradient(145deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin: 32px 0;
+      text-align: center;
+    }
+
+    .share-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+
+    .share-date {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .share-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-bottom: 28px;
+    }
+
+    .share-stat-value {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .share-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .share-percentages {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .share-percent-item {
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .share-percent-item.high {
+      background: rgba(200, 255, 0, 0.15);
+      color: var(--accent);
+    }
+
+    .share-percent-item.medium {
+      background: rgba(255, 170, 0, 0.15);
+      color: var(--warning);
+    }
+
+    .share-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-share {
+      background: var(--text-primary);
+      color: var(--bg-primary);
+    }
+
+    .btn-share:hover {
+      background: var(--text-secondary);
+    }
+
+    /* Admin Screen */
+    .admin-screen {
+      display: none;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .admin-title {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .back-link {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    .admin-section {
+      margin-bottom: 40px;
+    }
+
+    .admin-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .prompt-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .prompt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .prompt-list-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .prompt-list-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .prompt-list-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .prompt-list-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .prompt-list-votes {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .prompt-list-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .prompt-list-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-elevated);
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-icon.delete:hover {
+      background: #3d1515;
+      color: #ff4444;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .error-message {
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .success-message {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.1s; }
+    .stagger-3 { animation-delay: 0.15s; }
+    .stagger-4 { animation-delay: 0.2s; }
+    .stagger-5 { animation-delay: 0.25s; }
+
+    /* Category Selection */
+    .category-select-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .category-select-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .category-select-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .category-select-btn:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .category-select-btn.selected {
+      border-color: var(--accent);
+      background: rgba(200, 255, 0, 0.1);
+      color: var(--accent);
+    }
+
+    .category-select-btn.all-btn {
+      grid-column: 1 / -1;
+      background: var(--bg-elevated);
+    }
+
+    .category-select-btn.all-btn.selected {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="loading" style="display:flex; justify-content:center; align-items:center; height:60vh; font-family:'Space Mono'; color:var(--accent);">INITIALIZING TAKES...</div>
-
-    <div id="start-screen" class="screen">
-      <div class="header"><div class="logo">TAKES</div><span class="header-date" id="date-display"></span></div>
-      <div style="text-align:center; margin: 60px 0;"><h1 style="font-size:48px; font-weight:900; line-height:1;">DAILY SET</h1><p style="color:var(--text-secondary); margin-top:10px;">Synchronized community opinions.</p></div>
-      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Enter Daily Set</button>
-      <div id="played-msg" style="display:none; text-align:center; color:var(--accent); margin-top:20px; font-size:14px;">Already submitted. Back tomorrow.</div>
-      <div style="text-align:center; margin-top:60px;"><a href="#" onclick="showAdmin()" style="color:#444; font-size:11px; text-decoration:none;">ADMIN CONTROLS</a></div>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loader"></div>
+      <div class="loading-text">Loading today's takes...</div>
     </div>
 
-    <div id="game-screen" class="screen">
-      <div class="header"><div class="logo" style="font-size:20px;">TAKES</div><div id="prog-text" style="font-family:'Space Mono'; font-size:12px; color:#444;"></div></div>
-      <div class="progress-bar" id="progress-bar"></div>
+    <!-- Start Screen -->
+    <div id="start-screen" class="start-screen">
+      <div class="header">
+        <span class="header-date" id="header-date"></span>
+        <a href="#" class="admin-link" onclick="showAdmin(event)">Admin</a>
+      </div>
+
+      <div class="hero">
+        <div class="hero-logo">TAKES</div>
+        <p class="hero-tagline">Daily sports & culture opinions.<br>See where you stand.</p>
+      </div>
+
+      <div class="category-select-title">Pick your categories</div>
+      <div class="category-select-grid">
+        <button class="category-select-btn all-btn selected" onclick="toggleAllCategories(this)">All Categories</button>
+        <button class="category-select-btn" data-category="NFL" onclick="toggleCategory(this)">NFL</button>
+        <button class="category-select-btn" data-category="NBA" onclick="toggleCategory(this)">NBA</button>
+        <button class="category-select-btn" data-category="NHL" onclick="toggleCategory(this)">NHL</button>
+        <button class="category-select-btn" data-category="MLB" onclick="toggleCategory(this)">MLB</button>
+        <button class="category-select-btn" data-category="Soccer" onclick="toggleCategory(this)">Soccer</button>
+        <button class="category-select-btn" data-category="Actors" onclick="toggleCategory(this)">Actors</button>
+        <button class="category-select-btn" data-category="Musicians" onclick="toggleCategory(this)">Musicians</button>
+      </div>
+
+      <button class="btn btn-primary" onclick="startGame()">Play</button>
+
+      <div class="play-count"><span id="total-votes">0</span> takes today</div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="game-screen">
+      <div class="header">
+        <div class="logo logo-small">TAKES</div>
+        <span class="header-date" id="game-date"></span>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-text" id="progress-text">1 of 5</div>
+      </div>
+
       <div id="prompt-container"></div>
-      <button class="btn btn-primary" id="next-btn" onclick="nextTake()" disabled>Confirm Take</button>
+
+      <button class="btn btn-primary" id="next-btn" onclick="nextPrompt()" disabled>Next</button>
     </div>
 
-    <div id="results-screen" class="screen">
-      <div class="header"><div class="logo">RESULTS</div></div>
+    <!-- Results Screen -->
+    <div id="results-screen" class="results-screen">
+      <div class="header">
+        <div class="logo logo-small">TAKES</div>
+        <span class="header-date" id="results-date"></span>
+      </div>
+
+      <div class="results-header">
+        <div class="results-title">Your Takes Are In</div>
+        <div class="results-subtitle">Compared against <span id="results-total">0</span> others</div>
+      </div>
+
       <div id="results-container"></div>
-      <button class="btn btn-primary" onclick="location.reload()">Back to Home</button>
+
+      <div class="share-card">
+        <div class="share-logo">TAKES</div>
+        <div class="share-date" id="share-date"></div>
+        <div class="share-stats">
+          <div class="share-stat">
+            <div class="share-stat-value" id="share-avg-percent">0%</div>
+            <div class="share-stat-label">Avg Agreement</div>
+          </div>
+        </div>
+        <div class="share-percentages" id="share-percentages"></div>
+        <div class="share-buttons">
+          <button class="btn btn-share" onclick="shareResults()">Share Results</button>
+          <button class="btn btn-secondary" onclick="playAgain()">Play Again</button>
+        </div>
+      </div>
     </div>
 
-    <div id="admin-screen" class="screen">
-      <div class="header"><h2>ADMIN</h2><button class="btn" onclick="location.reload()" style="width:auto; padding:5px 15px; background:#333; color:#fff;">Exit</button></div>
+    <!-- Admin Screen -->
+    <div id="admin-screen" class="admin-screen">
+      <div class="admin-header">
+        <div class="admin-title">Admin</div>
+        <a href="#" class="back-link" onclick="hideAdmin(event)">← Back to game</a>
+      </div>
+
+      <div id="admin-message"></div>
+
       <div class="admin-section">
-        <p style="margin-bottom:10px; font-size:14px; color:gray;">Bulk Upload JSON (5 per set recommended)</p>
-        <textarea id="bulk-json" rows="8"></textarea>
-        <button class="btn btn-primary" onclick="handleUpload()">Upload New Prompts</button>
-        <button class="btn" onclick="rotateDay()" style="background:#222; color:#fff; margin-top:20px; border:1px solid #444;">Archive Current Set (New Day)</button>
+        <div class="admin-section-title">Bulk Upload</div>
+        <div class="prompt-form">
+          <div class="form-group">
+            <label class="form-label">Paste prompts in JSON format</label>
+            <textarea class="form-textarea" id="bulk-json" style="min-height: 200px; font-family: 'Space Mono', monospace; font-size: 12px;" placeholder='[
+  {
+    "category": "NBA",
+    "text": "_____ is the GOAT",
+    "options": ["MJ", "LeBron", "Kobe"]
+  }
+]'></textarea>
+            <div class="form-hint">Paste the JSON array I'll give you. All prompts will be added as Active.</div>
+          </div>
+          <button class="btn btn-primary" onclick="bulkUpload()">Upload All Prompts</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Add Single Prompt</div>
+        <div class="prompt-form">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn active" id="toggle-fill" onclick="setPromptType('fill')">Fill in Blank</button>
+              <button type="button" class="toggle-btn" id="toggle-ranking" onclick="setPromptType('ranking')">Rank 1-2-3</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="prompt-category">
+              <option value="NFL">NFL</option>
+              <option value="NBA">NBA</option>
+              <option value="NHL">NHL</option>
+              <option value="MLB">MLB</option>
+              <option value="Soccer">Soccer</option>
+              <option value="Actors">Actors/Actresses</option>
+              <option value="Musicians">Musicians</option>
+              <option value="Mixed">Mixed (Cross-Category)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prompt Text</label>
+            <input type="text" class="form-input" id="prompt-text" placeholder="_____ is the GOAT of basketball">
+            <div class="form-hint" id="prompt-text-hint">Use _____ for the blank</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="options-label">Answer Options</label>
+            <textarea class="form-textarea" id="prompt-options" placeholder="Michael Jordan&#10;LeBron James&#10;Kobe Bryant&#10;Kareem Abdul-Jabbar"></textarea>
+            <div class="form-hint" id="options-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn active" id="toggle-active" onclick="setPromptStatus(true)">Active</button>
+              <button type="button" class="toggle-btn" id="toggle-draft" onclick="setPromptStatus(false)">Draft</button>
+            </div>
+            <div class="form-hint">Draft prompts won't appear in the game</div>
+          </div>
+          <button class="btn btn-primary" onclick="addPrompt()">Add Prompt</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Prompt Bank (<span id="prompt-list-count">0</span>)</div>
+        <div class="prompt-list" id="prompt-list"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const SB_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
-    const SB_KEY = 'PASTE_YOUR_FULL_KEY_HERE';
-    const sb = window.supabase.createClient(SB_URL, SB_KEY);
+    // ==================== CONFIG ====================
+    const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRra3Zsa2V4Z2d6dGhjdHdlbW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDIyODQsImV4cCI6MjA4MzgxODI4NH0.-YwHTbGiwJfefq-B75whfeCN-Exxi9buKxj0YcgCMWY';
 
-    let prompts = [];
-    let cur = 0;
-    let choice = null;
+    // Initialize Supabase client
+    let supabaseClient;
+    let dbReady = false;
 
-    async function init() {
-      document.getElementById('date-display').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      if (localStorage.getItem('takes_' + new Date().toDateString())) {
-        document.getElementById('play-btn').disabled = true;
-        document.getElementById('played-msg').style.display = 'block';
+    // ==================== DATABASE LAYER ====================
+    const DB = {
+      init: async () => {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+          console.log('Supabase not configured, using localStorage fallback');
+          dbReady = true;
+          return;
+        }
+        
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          dbReady = true;
+        } catch (error) {
+          console.error('Supabase init error:', error);
+          dbReady = true; // Fall back to localStorage
+        }
+      },
+
+      // Get active prompts for today's game
+      getActivePrompts: async () => {
+        if (!supabaseClient) {
+          // localStorage fallback
+          const data = localStorage.getItem('takes_prompts');
+          const prompts = data ? JSON.parse(data) : [];
+          return prompts.filter(p => p.is_active !== false).slice(0, 5);
+        }
+
+        const { data, error } = await supabaseClient
+          .from('prompts')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) {
+          console.error('Error fetching prompts:', error);
+          return [];
+        }
+        return data || [];
+      },
+
+      // Get all prompts for admin
+      getAllPrompts: async () => {
+        if (!supabaseClient) {
+          const data = localStorage.getItem('takes_prompts');
+          return data ? JSON.parse(data) : [];
+        }
+
+        const { data, error } = await supabaseClient
+          .from('prompts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching prompts:', error);
+          return [];
+        }
+        return data || [];
+      },
+
+      // Add a new prompt
+      addPrompt: async (prompt) => {
+        if (!supabaseClient) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          prompt.id = Date.now();
+          prompt.created_at = new Date().toISOString();
+          prompt.vote_count = 0;
+          prompts.unshift(prompt);
+          localStorage.setItem('takes_prompts', JSON.stringify(prompts));
+          return { data: prompt, error: null };
+        }
+
+        const { data, error } = await supabaseClient
+          .from('prompts')
+          .insert([{
+            category: prompt.category,
+            text: prompt.text,
+            options: prompt.options,
+            type: prompt.type || 'fill',
+            is_active: prompt.is_active
+          }])
+          .select()
+          .single();
+
+        return { data, error };
+      },
+
+      // Delete a prompt
+      deletePrompt: async (id) => {
+        if (!supabaseClient) {
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const filtered = prompts.filter(p => p.id !== id);
+          localStorage.setItem('takes_prompts', JSON.stringify(filtered));
+          return { error: null };
+        }
+
+        const { error } = await supabaseClient
+          .from('prompts')
+          .delete()
+          .eq('id', id);
+
+        return { error };
+      },
+
+      // Record a vote
+      recordVote: async (promptId, answer, isOther = false) => {
+        if (!supabaseClient) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const prompt = prompts.find(p => p.id === promptId);
+          if (prompt) {
+            if (!prompt.votes) prompt.votes = {};
+            const key = answer.toLowerCase().trim();
+            prompt.votes[key] = (prompt.votes[key] || 0) + 1;
+            if (!prompt.vote_display) prompt.vote_display = {};
+            prompt.vote_display[key] = answer;
+            prompt.vote_count = (prompt.vote_count || 0) + 1;
+            localStorage.setItem('takes_prompts', JSON.stringify(prompts));
+          }
+          return { error: null };
+        }
+
+        // Insert vote record
+        const { error: voteError } = await supabaseClient
+          .from('votes')
+          .insert([{
+            prompt_id: promptId,
+            answer: answer,
+            is_other: isOther
+          }]);
+
+        if (voteError) {
+          console.error('Error recording vote:', voteError);
+        }
+
+        // Increment prompt vote count
+        await supabaseClient.rpc('increment_vote_count', { prompt_id: promptId });
+
+        return { error: voteError };
+      },
+
+      // Get results for a prompt
+      getResults: async (promptId) => {
+        if (!supabaseClient) {
+          // localStorage fallback
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          const prompt = prompts.find(p => p.id === promptId);
+          if (!prompt || !prompt.votes) return [];
+
+          const total = Object.values(prompt.votes).reduce((sum, v) => sum + v, 0) || 1;
+          return Object.entries(prompt.votes)
+            .map(([key, count]) => ({
+              name: prompt.vote_display?.[key] || key,
+              count,
+              percent: Math.round((count / total) * 100)
+            }))
+            .sort((a, b) => b.count - a.count);
+        }
+
+        const { data, error } = await supabaseClient
+          .from('votes')
+          .select('answer')
+          .eq('prompt_id', promptId);
+
+        if (error || !data) return [];
+
+        // Count votes
+        const counts = {};
+        data.forEach(vote => {
+          const key = vote.answer.toLowerCase().trim();
+          counts[key] = counts[key] || { name: vote.answer, count: 0 };
+          counts[key].count++;
+        });
+
+        const total = data.length || 1;
+        return Object.values(counts)
+          .map(item => ({
+            ...item,
+            percent: Math.round((item.count / total) * 100)
+          }))
+          .sort((a, b) => b.count - a.count);
+      },
+
+      // Get total vote count
+      getTotalVotes: async () => {
+        if (!supabaseClient) {
+          const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
+          return prompts.reduce((sum, p) => sum + (p.vote_count || 0), 0);
+        }
+
+        const { count, error } = await supabaseClient
+          .from('votes')
+          .select('*', { count: 'exact', head: true });
+
+        return count || 0;
+      },
+
+      // Check if played today (always localStorage)
+      hasPlayedToday: () => {
+        const lastPlayed = localStorage.getItem('takes_last_played');
+        if (!lastPlayed) return false;
+        return lastPlayed === new Date().toDateString();
+      },
+
+      markPlayed: () => {
+        localStorage.setItem('takes_last_played', new Date().toDateString());
+      },
+
+      resetPlayStatus: () => {
+        localStorage.removeItem('takes_last_played');
       }
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('start-screen').style.display = 'block';
+    };
+
+    // ==================== GAME STATE ====================
+    let currentPromptIndex = 0;
+    let userAnswers = [];
+    let selectedOption = null;
+    let isOtherSelected = false;
+    let todaysPrompts = [];
+    let newPromptIsActive = true;
+    let selectedCategories = new Set(); // empty = all categories
+    let userPercentages = []; // store percentages for sharing
+
+    // ==================== CATEGORY SELECTION ====================
+    function toggleAllCategories(btn) {
+      const categoryBtns = document.querySelectorAll('.category-select-btn[data-category]');
+      
+      if (btn.classList.contains('selected')) {
+        // Already selected, do nothing (must have at least "all" or some categories)
+        return;
+      }
+      
+      // Select "All" and deselect individual categories
+      btn.classList.add('selected');
+      categoryBtns.forEach(b => b.classList.remove('selected'));
+      selectedCategories.clear();
     }
 
-    async function startGame() {
-      const { data } = await sb.from('prompts').select('*').eq('was_used', false).order('id', { ascending: true }).limit(5);
-      if(!data || data.length < 5) { alert("Library low. Admin needs to add/archive."); return; }
+    function toggleCategory(btn) {
+      const allBtn = document.querySelector('.category-select-btn.all-btn');
+      const category = btn.dataset.category;
       
-      prompts = data.sort((a, b) => {
-        if (a.type === 'ranking') return -1;
-        if (b.category === 'MadLib') return 1;
-        return 0;
-      });
-
-      document.getElementById('start-screen').style.display = 'none';
-      document.getElementById('game-screen').style.display = 'block';
-      updateProgress();
-      render();
-    }
-
-    function render() {
-      const p = prompts[cur];
-      choice = null;
-      document.getElementById('next-btn').disabled = (p.type !== 'ranking');
-      let html = `<div class="prompt-card"><div class="prompt-category">${p.category}</div><div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>`;
-      
-      if(p.type === 'ranking') {
-        choice = "Ranked";
-        html += p.options.map((o, i) => `<div class="ranking-item"><div class="ranking-num">${i+1}</div><div>${o}</div></div>`).join('');
+      if (btn.classList.contains('selected')) {
+        // Deselecting
+        btn.classList.remove('selected');
+        selectedCategories.delete(category);
+        
+        // If nothing selected, default back to "All"
+        if (selectedCategories.size === 0) {
+          allBtn.classList.add('selected');
+        }
       } else {
-        html += p.options.map(o => `<button class="option-btn" onclick="setOpt('${o.replace(/'/g, "\\'")}', this)">${o}</button>`).join('');
+        // Selecting
+        btn.classList.add('selected');
+        selectedCategories.add(category);
+        allBtn.classList.remove('selected');
       }
-      html += `</div>`;
-      document.getElementById('prompt-container').innerHTML = html;
     }
 
-    function setOpt(val, el) {
-      choice = val;
-      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-      el.classList.add('selected');
+    // ==================== UI HELPERS ====================
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
+    function updateDates() {
+      const today = formatDate(new Date());
+      document.querySelectorAll('.header-date, #game-date, #results-date, #share-date').forEach(el => {
+        el.textContent = today;
+      });
+    }
+
+    async function updateStats() {
+      const totalVotes = await DB.getTotalVotes();
+      
+      const totalVotesEl = document.getElementById('total-votes');
+      if (totalVotesEl) {
+        totalVotesEl.textContent = totalVotes.toLocaleString();
+      }
+    }
+
+    function showScreen(screenId) {
+      ['loading-screen', 'start-screen', 'game-screen', 'results-screen', 'admin-screen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      document.getElementById(screenId).style.display = 'block';
+    }
+
+    function showAdminMessage(message, isError = false) {
+      const container = document.getElementById('admin-message');
+      container.innerHTML = `<div class="${isError ? 'error-message' : 'success-message'}">${message}</div>`;
+      setTimeout(() => { container.innerHTML = ''; }, 3000);
+    }
+
+    // ==================== SCREENS ====================
+    async function showAdmin(e) {
+      e.preventDefault();
+      showScreen('admin-screen');
+      await renderPromptList();
+    }
+
+    async function hideAdmin(e) {
+      e.preventDefault();
+      showScreen('start-screen');
+      await updateStats();
+    }
+
+    // ==================== GAME FLOW ====================
+    async function startGame() {
+      let allPrompts = await DB.getActivePrompts();
+      
+      if (allPrompts.length === 0) {
+        alert('No prompts available. Add some in the admin panel!');
+        return;
+      }
+
+      // Filter by selected categories (if any selected)
+      if (selectedCategories.size > 0) {
+        allPrompts = allPrompts.filter(p => 
+          selectedCategories.has(p.category) || p.category === 'Mixed'
+        );
+      }
+
+      if (allPrompts.length === 0) {
+        alert('No prompts available for selected categories.');
+        return;
+      }
+
+      // Separate ranking and non-ranking prompts
+      const rankingPrompts = allPrompts.filter(p => p.type === 'ranking');
+      const fillPrompts = allPrompts.filter(p => p.type !== 'ranking');
+
+      // Shuffle fill prompts
+      const shuffledFill = fillPrompts.sort(() => Math.random() - 0.5);
+
+      // Take up to 4 fill prompts, then 1 ranking prompt at the end
+      const selectedFill = shuffledFill.slice(0, 4);
+      const selectedRanking = rankingPrompts.length > 0 
+        ? [rankingPrompts[Math.floor(Math.random() * rankingPrompts.length)]]
+        : [];
+
+      todaysPrompts = [...selectedFill, ...selectedRanking];
+
+      // If we don't have enough fill prompts, add more from what's available
+      if (todaysPrompts.length < 5 && shuffledFill.length > 4) {
+        todaysPrompts = [...shuffledFill.slice(0, 5 - selectedRanking.length), ...selectedRanking];
+      }
+
+      if (todaysPrompts.length === 0) {
+        alert('No prompts available for selected categories.');
+        return;
+      }
+
+      currentPromptIndex = 0;
+      userAnswers = [];
+      userPercentages = [];
+      
+      showScreen('game-screen');
+      renderProgress();
+      renderPrompt();
+    }
+
+    function renderProgress() {
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.innerHTML = todaysPrompts.map((_, i) => {
+        let className = 'progress-segment';
+        if (i < currentPromptIndex) className += ' completed';
+        else if (i === currentPromptIndex) className += ' current';
+        return `<div class="${className}"><div class="progress-fill"></div></div>`;
+      }).join('');
+
+      document.getElementById('progress-text').textContent =
+        `${currentPromptIndex + 1} of ${todaysPrompts.length}`;
+    }
+
+    function renderPrompt() {
+      const prompt = todaysPrompts[currentPromptIndex];
+      const container = document.getElementById('prompt-container');
+      const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
+      const isRanking = prompt.type === 'ranking';
+
+      if (isRanking) {
+        // Ranking UI
+        container.innerHTML = `
+          <div class="prompt-card animate-in">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+              <span class="prompt-category ${(prompt.category || 'mixed').toLowerCase()}">${prompt.category || 'MIXED'}</span>
+              <span class="prompt-type-tag">RANK</span>
+            </div>
+            <div class="prompt-text">${prompt.text}</div>
+            <div class="ranking-container" id="ranking-container">
+              ${options.map((option, i) => `
+                <div class="ranking-item" draggable="true" data-index="${i}" data-name="${option.replace(/"/g, '&quot;')}">
+                  <div class="ranking-position">${i + 1}</div>
+                  <div class="ranking-name">${option}</div>
+                  <div class="ranking-handle">⋮⋮</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="ranking-hint">Drag to reorder</div>
+          </div>
+        `;
+        
+        initRankingDrag();
+        selectedOption = options.join(',');
+        document.getElementById('next-btn').disabled = false;
+      } else {
+        // Fill-in-the-blank UI (existing)
+        const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        container.innerHTML = `
+          <div class="prompt-card animate-in">
+            <span class="prompt-category ${prompt.category.toLowerCase()}">${prompt.category}</span>
+            <div class="prompt-text">${promptText}</div>
+            <div class="options-list">
+              ${options.map((option, i) => `
+                <button class="option-btn" onclick="selectOption('${option.replace(/'/g, "\\'")}', this, false)">
+                  <span class="option-letter">${letters[i]}</span>
+                  ${option}
+                </button>
+              `).join('')}
+              <button class="option-btn other" onclick="selectOther(this)">
+                <span class="option-letter">?</span>
+                Other...
+              </button>
+            </div>
+            <div class="other-input-container" id="other-input-container">
+              <input type="text" class="other-input" id="other-input" placeholder="Type your answer..." onkeyup="handleOtherInput(event)">
+            </div>
+          </div>
+        `;
+
+        selectedOption = null;
+        isOtherSelected = false;
+        document.getElementById('next-btn').disabled = true;
+      }
+
+      document.getElementById('next-btn').textContent =
+        currentPromptIndex === todaysPrompts.length - 1 ? 'See Results' : 'Next';
+    }
+
+    function initRankingDrag() {
+      const container = document.getElementById('ranking-container');
+      const items = container.querySelectorAll('.ranking-item');
+      let draggedItem = null;
+
+      items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+          updateRankingPositions();
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (item !== draggedItem) {
+            item.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (item !== draggedItem) {
+            const allItems = [...container.querySelectorAll('.ranking-item')];
+            const draggedIdx = allItems.indexOf(draggedItem);
+            const targetIdx = allItems.indexOf(item);
+            
+            if (draggedIdx < targetIdx) {
+              item.parentNode.insertBefore(draggedItem, item.nextSibling);
+            } else {
+              item.parentNode.insertBefore(draggedItem, item);
+            }
+          }
+        });
+
+        // Touch support
+        item.addEventListener('touchstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+        }, { passive: true });
+
+        item.addEventListener('touchmove', (e) => {
+          if (!draggedItem) return;
+          const touch = e.touches[0];
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetItem = target?.closest('.ranking-item');
+          
+          items.forEach(i => i.classList.remove('drag-over'));
+          if (targetItem && targetItem !== draggedItem) {
+            targetItem.classList.add('drag-over');
+          }
+        }, { passive: true });
+
+        item.addEventListener('touchend', (e) => {
+          const touch = e.changedTouches[0];
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetItem = target?.closest('.ranking-item');
+          
+          if (targetItem && targetItem !== draggedItem && draggedItem) {
+            const allItems = [...container.querySelectorAll('.ranking-item')];
+            const draggedIdx = allItems.indexOf(draggedItem);
+            const targetIdx = allItems.indexOf(targetItem);
+            
+            if (draggedIdx < targetIdx) {
+              targetItem.parentNode.insertBefore(draggedItem, targetItem.nextSibling);
+            } else {
+              targetItem.parentNode.insertBefore(draggedItem, targetItem);
+            }
+          }
+          
+          items.forEach(i => i.classList.remove('drag-over'));
+          if (draggedItem) draggedItem.classList.remove('dragging');
+          draggedItem = null;
+          updateRankingPositions();
+        });
+      });
+    }
+
+    function updateRankingPositions() {
+      const container = document.getElementById('ranking-container');
+      const items = container.querySelectorAll('.ranking-item');
+      const ranking = [];
+      
+      items.forEach((item, i) => {
+        item.querySelector('.ranking-position').textContent = i + 1;
+        ranking.push(item.dataset.name);
+      });
+      
+      selectedOption = ranking.join('|||');
+    }
+
+    function selectOption(option, element, isOther) {
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      document.getElementById('other-input-container').classList.remove('visible');
+
+      selectedOption = option;
+      isOtherSelected = isOther;
       document.getElementById('next-btn').disabled = false;
     }
 
-    async function nextTake() {
-      await sb.from('votes').insert([{ prompt_id: prompts[cur].id, answer: choice }]);
-      cur++;
-      if(cur >= prompts.length) {
-        localStorage.setItem('takes_' + new Date().toDateString(), 'true');
-        showResults();
-      } else { updateProgress(); render(); }
+    function selectOther(element) {
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      element.classList.add('selected');
+      document.getElementById('other-input-container').classList.add('visible');
+      document.getElementById('other-input').focus();
+
+      isOtherSelected = true;
+      selectedOption = '';
+      document.getElementById('next-btn').disabled = true;
+    }
+
+    function handleOtherInput(e) {
+      const value = e.target.value.trim();
+      selectedOption = value;
+      document.getElementById('next-btn').disabled = value.length === 0;
+      
+      if (e.key === 'Enter' && value.length > 0) {
+        nextPrompt();
+      }
+    }
+
+    async function nextPrompt() {
+      if (!selectedOption) return;
+
+      const prompt = todaysPrompts[currentPromptIndex];
+      
+      // Record vote
+      await DB.recordVote(prompt.id, selectedOption, isOtherSelected);
+
+      userAnswers.push({
+        promptId: prompt.id,
+        answer: selectedOption,
+        isOther: isOtherSelected
+      });
+
+      currentPromptIndex++;
+
+      if (currentPromptIndex >= todaysPrompts.length) {
+        DB.markPlayed();
+        await showResults();
+      } else {
+        renderProgress();
+        renderPrompt();
+      }
     }
 
     async function showResults() {
-      document.getElementById('game-screen').style.display = 'none';
-      document.getElementById('results-screen').style.display = 'block';
-      let html = '';
-      for (let p of prompts) {
-        const { data: v } = await sb.from('votes').select('answer').eq('prompt_id', p.id);
-        const counts = {};
-        v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
-        html += `<div class="prompt-card"><div class="prompt-category">${p.category}</div><div style="font-size:16px; margin-bottom:15px; font-weight:600;">${p.text}</div>`;
-        p.options.forEach(opt => {
-          const pct = v.length ? Math.round(((counts[opt] || 0) / v.length) * 100) : 0;
-          html += `<div style="margin-bottom:12px; font-size:14px;"><div style="display:flex; justify-content:space-between;"><span>${opt}</span><span>${pct}%</span></div>
-            <div style="width:100%; height:4px; background:#1a1a1a; margin-top:4px;"><div style="width:${pct}%; height:100%; background:var(--accent);"></div></div></div>`;
+      showScreen('results-screen');
+
+      const totalVotes = await DB.getTotalVotes();
+      document.getElementById('results-total').textContent = totalVotes.toLocaleString();
+
+      const resultsContainer = document.getElementById('results-container');
+      let topPicks = 0;
+      let totalPercent = 0;
+      let gridItems = [];
+
+      let resultsHTML = '';
+
+      for (let index = 0; index < todaysPrompts.length; index++) {
+        const prompt = todaysPrompts[index];
+        const userAnswer = userAnswers[index].answer;
+        const isRanking = prompt.type === 'ranking';
+
+        if (isRanking) {
+          // Ranking results
+          const results = await DB.getResults(prompt.id);
+          const userRanking = userAnswer.split('|||');
+          
+          // Find most common #1 pick
+          const top1Results = results.filter(r => r.name.includes('|||'));
+          let mostCommonFirst = userRanking[0];
+          let matchPercent = 0;
+          
+          if (top1Results.length > 0) {
+            // Count first-place votes
+            const firstPlaceVotes = {};
+            top1Results.forEach(r => {
+              const first = r.name.split('|||')[0];
+              firstPlaceVotes[first] = (firstPlaceVotes[first] || 0) + r.count;
+            });
+            
+            const sorted = Object.entries(firstPlaceVotes).sort((a, b) => b[1] - a[1]);
+            if (sorted.length > 0) {
+              mostCommonFirst = sorted[0][0];
+              const total = sorted.reduce((sum, [_, c]) => sum + c, 0);
+              matchPercent = Math.round((sorted[0][1] / total) * 100);
+            }
+          }
+          
+          const userMatchedFirst = userRanking[0] === mostCommonFirst;
+          const rankingPercent = userMatchedFirst ? matchPercent : 0;
+          totalPercent += rankingPercent;
+          userPercentages.push(rankingPercent);
+
+          resultsHTML += `
+            <div class="result-card animate-in stagger-${index + 1}">
+              <div class="result-prompt-text">${prompt.text} <span class="prompt-type-tag">RANK</span></div>
+              <div style="margin-top: 16px;">
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">YOUR RANKING</div>
+                ${userRanking.map((name, i) => `
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 24px; height: 24px; background: ${i === 0 ? 'var(--accent)' : 'var(--bg-elevated)'}; color: ${i === 0 ? 'var(--bg-primary)' : 'var(--text-muted)'}; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${i + 1}</div>
+                    <div style="font-size: 15px;">${name}</div>
+                  </div>
+                `).join('')}
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                  <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">MOST POPULAR #1</div>
+                  <div style="font-size: 18px; font-weight: 600; color: ${userMatchedFirst ? 'var(--accent)' : 'var(--text-primary)'};">
+                    ${mostCommonFirst} ${userMatchedFirst ? '<span class="you-badge">Match!</span>' : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          // Fill-in-the-blank results (existing logic)
+          const results = await DB.getResults(prompt.id);
+          const top5 = results.slice(0, 5);
+
+          const userRankIndex = results.findIndex(r =>
+            r.name.toLowerCase() === userAnswer.toLowerCase()
+          );
+          const userRank = userRankIndex + 1;
+          const userResult = results[userRankIndex];
+          const userPercent = userResult ? userResult.percent : 0;
+          totalPercent += userPercent;
+          userPercentages.push(userPercent);
+
+          let displayResults = [...top5];
+          if (userRank > 5 || userRank === 0) {
+            displayResults.push({
+              name: userAnswer,
+              percent: userPercent,
+              isUserOnly: true
+            });
+          }
+
+          const promptText = prompt.text.replace('_____', '<span class="blank">[blank]</span>');
+
+          resultsHTML += `
+            <div class="result-card animate-in stagger-${index + 1}">
+              <div class="result-prompt-text">${promptText}</div>
+              <div class="result-items">
+                ${displayResults.map((result, i) => {
+                  const isUserPick = result.name.toLowerCase() === userAnswer.toLowerCase();
+                  const rank = results.findIndex(r => r.name.toLowerCase() === result.name.toLowerCase()) + 1;
+                  const displayRank = rank > 0 && rank <= 5 ? rank : '—';
+
+                  return `
+                    <div class="result-item ${isUserPick ? 'user-pick' : ''}">
+                      <div class="result-rank">${displayRank}</div>
+                      <div class="result-bar-wrapper">
+                        <div class="result-bar-bg">
+                          <div class="result-bar-fill" style="width: ${Math.max(result.percent, 15)}%">
+                            <span class="result-name">
+                              ${result.name}
+                              ${isUserPick ? '<span class="you-badge">You</span>' : ''}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <span class="result-percent">${result.percent}%</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      resultsContainer.innerHTML = resultsHTML;
+
+      // Update share card with percentages
+      document.getElementById('share-avg-percent').textContent =
+        Math.round(totalPercent / todaysPrompts.length) + '%';
+
+      // Build percentage display
+      document.getElementById('share-percentages').innerHTML = userPercentages.map(p => {
+        let className = 'share-percent-item';
+        if (p >= 40) className += ' high';
+        else if (p >= 25) className += ' medium';
+        return `<div class="${className}">${p}%</div>`;
+      }).join('');
+    }
+
+    function shareResults() {
+      const avgPercent = document.getElementById('share-avg-percent').textContent;
+      const date = formatDate(new Date());
+
+      const percentString = userPercentages.map(p => `${p}%`).join(' · ');
+
+      const text = `TAKES ${date}\n\n${percentString}\n\nAvg: ${avgPercent} agreement\n\nPlay at takes.game`;
+
+      if (navigator.share) {
+        navigator.share({ text });
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Copied to clipboard!');
         });
-        html += `</div>`;
-      }
-      document.getElementById('results-container').innerHTML = html;
-    }
-
-    function updateProgress() {
-      const bar = document.getElementById('progress-bar');
-      bar.innerHTML = prompts.map((_, i) => `<div class="progress-seg"><div class="progress-fill" style="width:${i < cur ? '100' : (i === cur ? '50' : '0')}%"></div></div>`).join('');
-      document.getElementById('prog-text').innerText = (cur + 1) + " / " + prompts.length;
-    }
-
-    function showAdmin() { document.getElementById('start-screen').style.display='none'; document.getElementById('admin-screen').style.display='block'; }
-    async function handleUpload() {
-      const data = JSON.parse(document.getElementById('bulk-json').value);
-      await sb.from('prompts').insert(data);
-      alert("Successfully Added!"); location.reload();
-    }
-    async function rotateDay() {
-      if(!confirm("Rotate to next day?")) return;
-      const { data } = await sb.from('prompts').select('id').eq('was_used', false).order('id', { ascending: true }).limit(5);
-      if(data) {
-        await sb.from('prompts').update({ was_used: true }).in('id', data.map(d => d.id));
-        alert("Day Rotated!"); location.reload();
       }
     }
+
+    async function playAgain() {
+      DB.resetPlayStatus();
+      showScreen('start-screen');
+      await updateStats();
+    }
+
+    // ==================== ADMIN ====================
+    function setPromptStatus(isActive) {
+      newPromptIsActive = isActive;
+      document.getElementById('toggle-active').classList.toggle('active', isActive);
+      document.getElementById('toggle-draft').classList.toggle('active', !isActive);
+    }
+
+    let newPromptType = 'fill';
+    
+    function setPromptType(type) {
+      newPromptType = type;
+      document.getElementById('toggle-fill').classList.toggle('active', type === 'fill');
+      document.getElementById('toggle-ranking').classList.toggle('active', type === 'ranking');
+      
+      // Update hints
+      const textHint = document.getElementById('prompt-text-hint');
+      const optionsLabel = document.getElementById('options-label');
+      const optionsHint = document.getElementById('options-hint');
+      const textInput = document.getElementById('prompt-text');
+      const optionsInput = document.getElementById('prompt-options');
+      
+      if (type === 'ranking') {
+        textHint.textContent = 'e.g., "Rank these athletes by career legacy"';
+        textInput.placeholder = 'Rank these athletes by career legacy';
+        optionsLabel.textContent = 'People to Rank (exactly 3)';
+        optionsHint.textContent = 'Enter exactly 3 names, one per line';
+        optionsInput.placeholder = 'LeBron James\nTom Brady\nTaylor Swift';
+      } else {
+        textHint.textContent = 'Use _____ for the blank';
+        textInput.placeholder = '_____ is the GOAT of basketball';
+        optionsLabel.textContent = 'Answer Options';
+        optionsHint.textContent = 'One option per line (7-11 recommended). "Other" added automatically.';
+        optionsInput.placeholder = 'Michael Jordan\nLeBron James\nKobe Bryant\nKareem Abdul-Jabbar';
+      }
+    }
+
+    async function renderPromptList() {
+      const prompts = await DB.getAllPrompts();
+      const container = document.getElementById('prompt-list');
+      document.getElementById('prompt-list-count').textContent = prompts.length;
+
+      if (prompts.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <div>No prompts yet. Add your first one above!</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = prompts.map(prompt => `
+        <div class="prompt-list-item">
+          <div class="prompt-list-content">
+            <div class="prompt-list-meta">
+              <span class="prompt-list-category">${prompt.category}</span>
+              ${prompt.type === 'ranking' ? '<span class="prompt-type-tag">RANK</span>' : ''}
+              <span class="prompt-list-votes">${prompt.vote_count || 0} votes</span>
+              ${prompt.is_active === false ? '<span class="prompt-list-votes">(Draft)</span>' : ''}
+            </div>
+            <div class="prompt-list-text">${prompt.text}</div>
+          </div>
+          <div class="prompt-list-actions">
+            <button class="btn-icon delete" onclick="deletePrompt(${prompt.id})" title="Delete">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function addPrompt() {
+      const category = document.getElementById('prompt-category').value;
+      const text = document.getElementById('prompt-text').value.trim();
+      const optionsText = document.getElementById('prompt-options').value.trim();
+      const type = newPromptType;
+
+      if (!text || !optionsText) {
+        showAdminMessage('Please fill in all fields', true);
+        return;
+      }
+
+      const options = optionsText.split('\n').map(o => o.trim()).filter(o => o);
+
+      if (type === 'ranking') {
+        if (options.length !== 3) {
+          showAdminMessage('Ranking prompts need exactly 3 options', true);
+          return;
+        }
+      } else {
+        if (!text.includes('_____')) {
+          showAdminMessage('Prompt must include _____ for the blank', true);
+          return;
+        }
+        if (options.length < 3) {
+          showAdminMessage('Please provide at least 3 answer options', true);
+          return;
+        }
+      }
+
+      const { data, error } = await DB.addPrompt({
+        category,
+        text,
+        options,
+        type: type,
+        is_active: newPromptIsActive
+      });
+
+      if (error) {
+        showAdminMessage('Error adding prompt: ' + error.message, true);
+        return;
+      }
+
+      // Clear form
+      document.getElementById('prompt-text').value = '';
+      document.getElementById('prompt-options').value = '';
+      
+      showAdminMessage('Prompt added successfully!');
+      await renderPromptList();
+    }
+
+    async function bulkUpload() {
+      const jsonText = document.getElementById('bulk-json').value.trim();
+      
+      if (!jsonText) {
+        showAdminMessage('Please paste the JSON data', true);
+        return;
+      }
+
+      let prompts;
+      try {
+        prompts = JSON.parse(jsonText);
+      } catch (e) {
+        showAdminMessage('Invalid JSON format. Check for errors.', true);
+        return;
+      }
+
+      if (!Array.isArray(prompts)) {
+        showAdminMessage('JSON must be an array of prompts', true);
+        return;
+      }
+
+      showAdminMessage(`Uploading ${prompts.length} prompts...`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const prompt of prompts) {
+        if (!prompt.category || !prompt.text || !prompt.options) {
+          errorCount++;
+          continue;
+        }
+
+        const { error } = await DB.addPrompt({
+          category: prompt.category,
+          text: prompt.text,
+          options: prompt.options,
+          type: prompt.type || 'fill',
+          is_active: true
+        });
+
+        if (error) {
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      }
+
+      document.getElementById('bulk-json').value = '';
+      showAdminMessage(`Done! ${successCount} prompts added${errorCount > 0 ? `, ${errorCount} failed` : ''}`);
+      await renderPromptList();
+    }
+
+    async function deletePrompt(id) {
+      if (!confirm('Delete this prompt? This cannot be undone.')) return;
+
+      const { error } = await DB.deletePrompt(id);
+      
+      if (error) {
+        showAdminMessage('Error deleting prompt: ' + error.message, true);
+        return;
+      }
+
+      showAdminMessage('Prompt deleted');
+      await renderPromptList();
+    }
+
+    // ==================== SEED DATA ====================
+    async function seedInitialData() {
+      const prompts = await DB.getAllPrompts();
+      if (prompts.length > 0) return;
+
+      const seedPrompts = [
+        {
+          category: "NBA",
+          text: "_____ is the Tony Romo of the NBA",
+          options: ["Joel Embiid", "Chris Paul", "James Harden", "Patrick Ewing", "Carmelo Anthony", "Damian Lillard", "Karl Malone", "Charles Barkley"],
+          is_active: true
+        },
+        {
+          category: "NBA",
+          text: "The most overrated player in the NBA right now is _____",
+          options: ["Zion Williamson", "Trae Young", "Ben Simmons", "Draymond Green", "Paul George", "Russell Westbrook", "Jayson Tatum", "Kyrie Irving"],
+          is_active: true
+        },
+        {
+          category: "NFL",
+          text: "The NFL team most likely to move cities in the next 10 years is _____",
+          options: ["Jacksonville Jaguars", "Cincinnati Bengals", "Tennessee Titans", "New Orleans Saints", "Carolina Panthers", "Arizona Cardinals", "Miami Dolphins", "Buffalo Bills"],
+          is_active: true
+        },
+        {
+          category: "Musicians",
+          text: "_____ is the most overrated artist of the last decade",
+          options: ["Drake", "Taylor Swift", "Ed Sheeran", "Post Malone", "Billie Eilish", "The Weeknd", "Harry Styles", "Dua Lipa"],
+          is_active: true
+        },
+        {
+          category: "Actors",
+          text: "_____ should have won an Oscar by now",
+          options: ["Adam Sandler", "Tom Cruise", "Jake Gyllenhaal", "Amy Adams", "Glenn Close", "Robert Downey Jr.", "Samuel L. Jackson", "Jim Carrey"],
+          is_active: true
+        }
+      ];
+
+      for (const prompt of seedPrompts) {
+        await DB.addPrompt(prompt);
+      }
+    }
+
+    // ==================== INIT ====================
+    async function init() {
+      await DB.init();
+      await seedInitialData();
+      updateDates();
+      await updateStats();
+      showScreen('start-screen');
+    }
+
     init();
   </script>
 </body>
