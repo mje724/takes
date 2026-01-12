@@ -438,6 +438,101 @@
     .option-btn.selected .option-letter {
       background: var(--accent);
       color: var(--bg-primary);
+
+    /* Ranking UI */
+    .ranking-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ranking-item {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: grab;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .ranking-item:hover {
+      border-color: var(--text-muted);
+      background: var(--bg-elevated);
+    }
+
+    .ranking-item.dragging {
+      opacity: 0.5;
+      border-color: var(--accent);
+    }
+
+    .ranking-item.drag-over {
+      border-color: var(--accent);
+      background: rgba(200, 255, 0, 0.08);
+    }
+
+    .ranking-position {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .ranking-item:nth-child(1) .ranking-position {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .ranking-item:nth-child(2) .ranking-position {
+      background: var(--text-secondary);
+      color: var(--bg-primary);
+    }
+
+    .ranking-item:nth-child(3) .ranking-position {
+      background: var(--text-muted);
+      color: var(--bg-primary);
+    }
+
+    .ranking-name {
+      font-size: 18px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .ranking-handle {
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    .ranking-hint {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .prompt-type-tag {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
     }
 
     .other-input-container {
@@ -1049,6 +1144,13 @@
         <div class="admin-section-title">Add Single Prompt</div>
         <div class="prompt-form">
           <div class="form-group">
+            <label class="form-label">Type</label>
+            <div class="toggle-group">
+              <button type="button" class="toggle-btn active" id="toggle-fill" onclick="setPromptType('fill')">Fill in Blank</button>
+              <button type="button" class="toggle-btn" id="toggle-ranking" onclick="setPromptType('ranking')">Rank 1-2-3</button>
+            </div>
+          </div>
+          <div class="form-group">
             <label class="form-label">Category</label>
             <select class="form-select" id="prompt-category">
               <option value="NFL">NFL</option>
@@ -1058,17 +1160,18 @@
               <option value="Soccer">Soccer</option>
               <option value="Actors">Actors/Actresses</option>
               <option value="Musicians">Musicians</option>
+              <option value="Mixed">Mixed (Cross-Category)</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Prompt Text</label>
             <input type="text" class="form-input" id="prompt-text" placeholder="_____ is the GOAT of basketball">
-            <div class="form-hint">Use _____ for the blank</div>
+            <div class="form-hint" id="prompt-text-hint">Use _____ for the blank</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Answer Options</label>
+            <label class="form-label" id="options-label">Answer Options</label>
             <textarea class="form-textarea" id="prompt-options" placeholder="Michael Jordan&#10;LeBron James&#10;Kobe Bryant&#10;Kareem Abdul-Jabbar"></textarea>
-            <div class="form-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
+            <div class="form-hint" id="options-hint">One option per line (7-11 recommended). "Other" added automatically.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Status</label>
@@ -1177,6 +1280,7 @@
             category: prompt.category,
             text: prompt.text,
             options: prompt.options,
+            type: prompt.type || 'fill',
             is_active: prompt.is_active
           }])
           .select()
@@ -1406,37 +1510,168 @@
       const prompt = todaysPrompts[currentPromptIndex];
       const container = document.getElementById('prompt-container');
       const options = Array.isArray(prompt.options) ? prompt.options : JSON.parse(prompt.options || '[]');
+      const isRanking = prompt.type === 'ranking';
 
-      const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (isRanking) {
+        // Ranking UI
+        container.innerHTML = `
+          <div class="prompt-card animate-in">
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+              <span class="prompt-category ${(prompt.category || 'mixed').toLowerCase()}">${prompt.category || 'MIXED'}</span>
+              <span class="prompt-type-tag">RANK</span>
+            </div>
+            <div class="prompt-text">${prompt.text}</div>
+            <div class="ranking-container" id="ranking-container">
+              ${options.map((option, i) => `
+                <div class="ranking-item" draggable="true" data-index="${i}" data-name="${option.replace(/"/g, '&quot;')}">
+                  <div class="ranking-position">${i + 1}</div>
+                  <div class="ranking-name">${option}</div>
+                  <div class="ranking-handle">⋮⋮</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="ranking-hint">Drag to reorder</div>
+          </div>
+        `;
+        
+        initRankingDrag();
+        selectedOption = options.join(',');
+        document.getElementById('next-btn').disabled = false;
+      } else {
+        // Fill-in-the-blank UI (existing)
+        const promptText = prompt.text.replace('_____', '<span class="prompt-blank">_____</span>');
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-      container.innerHTML = `
-        <div class="prompt-card animate-in">
-          <span class="prompt-category ${prompt.category.toLowerCase()}">${prompt.category}</span>
-          <div class="prompt-text">${promptText}</div>
-          <div class="options-list">
-            ${options.map((option, i) => `
-              <button class="option-btn" onclick="selectOption('${option.replace(/'/g, "\\'")}', this, false)">
-                <span class="option-letter">${letters[i]}</span>
-                ${option}
+        container.innerHTML = `
+          <div class="prompt-card animate-in">
+            <span class="prompt-category ${prompt.category.toLowerCase()}">${prompt.category}</span>
+            <div class="prompt-text">${promptText}</div>
+            <div class="options-list">
+              ${options.map((option, i) => `
+                <button class="option-btn" onclick="selectOption('${option.replace(/'/g, "\\'")}', this, false)">
+                  <span class="option-letter">${letters[i]}</span>
+                  ${option}
+                </button>
+              `).join('')}
+              <button class="option-btn other" onclick="selectOther(this)">
+                <span class="option-letter">?</span>
+                Other...
               </button>
-            `).join('')}
-            <button class="option-btn other" onclick="selectOther(this)">
-              <span class="option-letter">?</span>
-              Other...
-            </button>
+            </div>
+            <div class="other-input-container" id="other-input-container">
+              <input type="text" class="other-input" id="other-input" placeholder="Type your answer..." onkeyup="handleOtherInput(event)">
+            </div>
           </div>
-          <div class="other-input-container" id="other-input-container">
-            <input type="text" class="other-input" id="other-input" placeholder="Type your answer..." onkeyup="handleOtherInput(event)">
-          </div>
-        </div>
-      `;
+        `;
 
-      selectedOption = null;
-      isOtherSelected = false;
-      document.getElementById('next-btn').disabled = true;
+        selectedOption = null;
+        isOtherSelected = false;
+        document.getElementById('next-btn').disabled = true;
+      }
+
       document.getElementById('next-btn').textContent =
         currentPromptIndex === todaysPrompts.length - 1 ? 'See Results' : 'Next';
+    }
+
+    function initRankingDrag() {
+      const container = document.getElementById('ranking-container');
+      const items = container.querySelectorAll('.ranking-item');
+      let draggedItem = null;
+
+      items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+          updateRankingPositions();
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (item !== draggedItem) {
+            item.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (item !== draggedItem) {
+            const allItems = [...container.querySelectorAll('.ranking-item')];
+            const draggedIdx = allItems.indexOf(draggedItem);
+            const targetIdx = allItems.indexOf(item);
+            
+            if (draggedIdx < targetIdx) {
+              item.parentNode.insertBefore(draggedItem, item.nextSibling);
+            } else {
+              item.parentNode.insertBefore(draggedItem, item);
+            }
+          }
+        });
+
+        // Touch support
+        item.addEventListener('touchstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+        }, { passive: true });
+
+        item.addEventListener('touchmove', (e) => {
+          if (!draggedItem) return;
+          const touch = e.touches[0];
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetItem = target?.closest('.ranking-item');
+          
+          items.forEach(i => i.classList.remove('drag-over'));
+          if (targetItem && targetItem !== draggedItem) {
+            targetItem.classList.add('drag-over');
+          }
+        }, { passive: true });
+
+        item.addEventListener('touchend', (e) => {
+          const touch = e.changedTouches[0];
+          const target = document.elementFromPoint(touch.clientX, touch.clientY);
+          const targetItem = target?.closest('.ranking-item');
+          
+          if (targetItem && targetItem !== draggedItem && draggedItem) {
+            const allItems = [...container.querySelectorAll('.ranking-item')];
+            const draggedIdx = allItems.indexOf(draggedItem);
+            const targetIdx = allItems.indexOf(targetItem);
+            
+            if (draggedIdx < targetIdx) {
+              targetItem.parentNode.insertBefore(draggedItem, targetItem.nextSibling);
+            } else {
+              targetItem.parentNode.insertBefore(draggedItem, targetItem);
+            }
+          }
+          
+          items.forEach(i => i.classList.remove('drag-over'));
+          if (draggedItem) draggedItem.classList.remove('dragging');
+          draggedItem = null;
+          updateRankingPositions();
+        });
+      });
+    }
+
+    function updateRankingPositions() {
+      const container = document.getElementById('ranking-container');
+      const items = container.querySelectorAll('.ranking-item');
+      const ranking = [];
+      
+      items.forEach((item, i) => {
+        item.querySelector('.ranking-position').textContent = i + 1;
+        ranking.push(item.dataset.name);
+      });
+      
+      selectedOption = ranking.join('|||');
     }
 
     function selectOption(option, element, isOther) {
@@ -1511,68 +1746,129 @@
       for (let index = 0; index < todaysPrompts.length; index++) {
         const prompt = todaysPrompts[index];
         const userAnswer = userAnswers[index].answer;
-        const results = await DB.getResults(prompt.id);
-        const top5 = results.slice(0, 5);
+        const isRanking = prompt.type === 'ranking';
 
-        const userRankIndex = results.findIndex(r =>
-          r.name.toLowerCase() === userAnswer.toLowerCase()
-        );
-        const userRank = userRankIndex + 1;
-        const userResult = results[userRankIndex];
-        const userPercent = userResult ? userResult.percent : 0;
-        totalPercent += userPercent;
+        if (isRanking) {
+          // Ranking results
+          const results = await DB.getResults(prompt.id);
+          const userRanking = userAnswer.split('|||');
+          
+          // Find most common #1 pick
+          const top1Results = results.filter(r => r.name.includes('|||'));
+          let mostCommonFirst = userRanking[0];
+          let matchPercent = 0;
+          
+          if (top1Results.length > 0) {
+            // Count first-place votes
+            const firstPlaceVotes = {};
+            top1Results.forEach(r => {
+              const first = r.name.split('|||')[0];
+              firstPlaceVotes[first] = (firstPlaceVotes[first] || 0) + r.count;
+            });
+            
+            const sorted = Object.entries(firstPlaceVotes).sort((a, b) => b[1] - a[1]);
+            if (sorted.length > 0) {
+              mostCommonFirst = sorted[0][0];
+              const total = sorted.reduce((sum, [_, c]) => sum + c, 0);
+              matchPercent = Math.round((sorted[0][1] / total) * 100);
+            }
+          }
+          
+          const userMatchedFirst = userRanking[0] === mostCommonFirst;
+          totalPercent += userMatchedFirst ? 100 : 0;
+          
+          if (userMatchedFirst) {
+            topPicks++;
+            gridItems.push('top1');
+          } else {
+            gridItems.push('outside');
+          }
 
-        if (userRank === 1) {
-          topPicks++;
-          gridItems.push('top1');
-        } else if (userRank <= 3) {
-          gridItems.push('top3');
-        } else if (userRank <= 5) {
-          gridItems.push('top5');
+          resultsHTML += `
+            <div class="result-card animate-in stagger-${index + 1}">
+              <div class="result-prompt-text">${prompt.text} <span class="prompt-type-tag">RANK</span></div>
+              <div style="margin-top: 16px;">
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">YOUR RANKING</div>
+                ${userRanking.map((name, i) => `
+                  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <div style="width: 24px; height: 24px; background: ${i === 0 ? 'var(--accent)' : 'var(--bg-elevated)'}; color: ${i === 0 ? 'var(--bg-primary)' : 'var(--text-muted)'}; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">${i + 1}</div>
+                    <div style="font-size: 15px;">${name}</div>
+                  </div>
+                `).join('')}
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                  <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">MOST POPULAR #1</div>
+                  <div style="font-size: 18px; font-weight: 600; color: ${userMatchedFirst ? 'var(--accent)' : 'var(--text-primary)'};">
+                    ${mostCommonFirst} ${userMatchedFirst ? '<span class="you-badge">Match!</span>' : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
         } else {
-          gridItems.push('outside');
-        }
+          // Fill-in-the-blank results (existing logic)
+          const results = await DB.getResults(prompt.id);
+          const top5 = results.slice(0, 5);
 
-        let displayResults = [...top5];
-        if (userRank > 5 || userRank === 0) {
-          displayResults.push({
-            name: userAnswer,
-            percent: userPercent,
-            isUserOnly: true
-          });
-        }
+          const userRankIndex = results.findIndex(r =>
+            r.name.toLowerCase() === userAnswer.toLowerCase()
+          );
+          const userRank = userRankIndex + 1;
+          const userResult = results[userRankIndex];
+          const userPercent = userResult ? userResult.percent : 0;
+          totalPercent += userPercent;
 
-        const promptText = prompt.text.replace('_____', '<span class="blank">[blank]</span>');
+          if (userRank === 1) {
+            topPicks++;
+            gridItems.push('top1');
+          } else if (userRank <= 3) {
+            gridItems.push('top3');
+          } else if (userRank <= 5) {
+            gridItems.push('top5');
+          } else {
+            gridItems.push('outside');
+          }
 
-        resultsHTML += `
-          <div class="result-card animate-in stagger-${index + 1}">
-            <div class="result-prompt-text">${promptText}</div>
-            <div class="result-items">
-              ${displayResults.map((result, i) => {
-                const isUserPick = result.name.toLowerCase() === userAnswer.toLowerCase();
-                const rank = results.findIndex(r => r.name.toLowerCase() === result.name.toLowerCase()) + 1;
-                const displayRank = rank > 0 && rank <= 5 ? rank : '—';
+          let displayResults = [...top5];
+          if (userRank > 5 || userRank === 0) {
+            displayResults.push({
+              name: userAnswer,
+              percent: userPercent,
+              isUserOnly: true
+            });
+          }
 
-                return `
-                  <div class="result-item ${isUserPick ? 'user-pick' : ''}">
-                    <div class="result-rank">${displayRank}</div>
-                    <div class="result-bar-wrapper">
-                      <div class="result-bar-bg">
-                        <div class="result-bar-fill" style="width: ${Math.max(result.percent, 15)}%">
-                          <span class="result-name">
-                            ${result.name}
-                            ${isUserPick ? '<span class="you-badge">You</span>' : ''}
-                          </span>
+          const promptText = prompt.text.replace('_____', '<span class="blank">[blank]</span>');
+
+          resultsHTML += `
+            <div class="result-card animate-in stagger-${index + 1}">
+              <div class="result-prompt-text">${promptText}</div>
+              <div class="result-items">
+                ${displayResults.map((result, i) => {
+                  const isUserPick = result.name.toLowerCase() === userAnswer.toLowerCase();
+                  const rank = results.findIndex(r => r.name.toLowerCase() === result.name.toLowerCase()) + 1;
+                  const displayRank = rank > 0 && rank <= 5 ? rank : '—';
+
+                  return `
+                    <div class="result-item ${isUserPick ? 'user-pick' : ''}">
+                      <div class="result-rank">${displayRank}</div>
+                      <div class="result-bar-wrapper">
+                        <div class="result-bar-bg">
+                          <div class="result-bar-fill" style="width: ${Math.max(result.percent, 15)}%">
+                            <span class="result-name">
+                              ${result.name}
+                              ${isUserPick ? '<span class="you-badge">You</span>' : ''}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <span class="result-percent">${result.percent}%</span>
                     </div>
-                    <span class="result-percent">${result.percent}%</span>
-                  </div>
-                `;
-              }).join('')}
+                  `;
+                }).join('')}
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }
 
       resultsContainer.innerHTML = resultsHTML;
@@ -1625,6 +1921,35 @@
       document.getElementById('toggle-draft').classList.toggle('active', !isActive);
     }
 
+    let newPromptType = 'fill';
+    
+    function setPromptType(type) {
+      newPromptType = type;
+      document.getElementById('toggle-fill').classList.toggle('active', type === 'fill');
+      document.getElementById('toggle-ranking').classList.toggle('active', type === 'ranking');
+      
+      // Update hints
+      const textHint = document.getElementById('prompt-text-hint');
+      const optionsLabel = document.getElementById('options-label');
+      const optionsHint = document.getElementById('options-hint');
+      const textInput = document.getElementById('prompt-text');
+      const optionsInput = document.getElementById('prompt-options');
+      
+      if (type === 'ranking') {
+        textHint.textContent = 'e.g., "Rank these athletes by career legacy"';
+        textInput.placeholder = 'Rank these athletes by career legacy';
+        optionsLabel.textContent = 'People to Rank (exactly 3)';
+        optionsHint.textContent = 'Enter exactly 3 names, one per line';
+        optionsInput.placeholder = 'LeBron James\nTom Brady\nTaylor Swift';
+      } else {
+        textHint.textContent = 'Use _____ for the blank';
+        textInput.placeholder = '_____ is the GOAT of basketball';
+        optionsLabel.textContent = 'Answer Options';
+        optionsHint.textContent = 'One option per line (7-11 recommended). "Other" added automatically.';
+        optionsInput.placeholder = 'Michael Jordan\nLeBron James\nKobe Bryant\nKareem Abdul-Jabbar';
+      }
+    }
+
     async function renderPromptList() {
       const prompts = await DB.getAllPrompts();
       const container = document.getElementById('prompt-list');
@@ -1645,6 +1970,7 @@
           <div class="prompt-list-content">
             <div class="prompt-list-meta">
               <span class="prompt-list-category">${prompt.category}</span>
+              ${prompt.type === 'ranking' ? '<span class="prompt-type-tag">RANK</span>' : ''}
               <span class="prompt-list-votes">${prompt.vote_count || 0} votes</span>
               ${prompt.is_active === false ? '<span class="prompt-list-votes">(Draft)</span>' : ''}
             </div>
@@ -1665,28 +1991,36 @@
       const category = document.getElementById('prompt-category').value;
       const text = document.getElementById('prompt-text').value.trim();
       const optionsText = document.getElementById('prompt-options').value.trim();
+      const type = newPromptType;
 
       if (!text || !optionsText) {
         showAdminMessage('Please fill in all fields', true);
         return;
       }
 
-      if (!text.includes('_____')) {
-        showAdminMessage('Prompt must include _____ for the blank', true);
-        return;
-      }
-
       const options = optionsText.split('\n').map(o => o.trim()).filter(o => o);
 
-      if (options.length < 3) {
-        showAdminMessage('Please provide at least 3 answer options', true);
-        return;
+      if (type === 'ranking') {
+        if (options.length !== 3) {
+          showAdminMessage('Ranking prompts need exactly 3 options', true);
+          return;
+        }
+      } else {
+        if (!text.includes('_____')) {
+          showAdminMessage('Prompt must include _____ for the blank', true);
+          return;
+        }
+        if (options.length < 3) {
+          showAdminMessage('Please provide at least 3 answer options', true);
+          return;
+        }
       }
 
       const { data, error } = await DB.addPrompt({
         category,
         text,
         options,
+        type: type,
         is_active: newPromptIsActive
       });
 
@@ -1739,6 +2073,7 @@
           category: prompt.category,
           text: prompt.text,
           options: prompt.options,
+          type: prompt.type || 'fill',
           is_active: true
         });
 
