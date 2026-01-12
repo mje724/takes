@@ -1028,7 +1028,25 @@
       <div id="admin-message"></div>
 
       <div class="admin-section">
-        <div class="admin-section-title">Add New Prompt</div>
+        <div class="admin-section-title">Bulk Upload</div>
+        <div class="prompt-form">
+          <div class="form-group">
+            <label class="form-label">Paste prompts in JSON format</label>
+            <textarea class="form-textarea" id="bulk-json" style="min-height: 200px; font-family: 'Space Mono', monospace; font-size: 12px;" placeholder='[
+  {
+    "category": "NBA",
+    "text": "_____ is the GOAT",
+    "options": ["MJ", "LeBron", "Kobe"]
+  }
+]'></textarea>
+            <div class="form-hint">Paste the JSON array I'll give you. All prompts will be added as Active.</div>
+          </div>
+          <button class="btn btn-primary" onclick="bulkUpload()">Upload All Prompts</button>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-title">Add Single Prompt</div>
         <div class="prompt-form">
           <div class="form-group">
             <label class="form-label">Category</label>
@@ -1319,16 +1337,12 @@
     }
 
     async function updateStats() {
-      const prompts = await DB.getActivePrompts();
       const totalVotes = await DB.getTotalVotes();
       
-      document.getElementById('prompt-count').textContent = prompts.length;
-      document.getElementById('total-votes').textContent = totalVotes.toLocaleString();
-      
-      // Set theme based on categories
-      const categories = [...new Set(prompts.map(p => p.category))];
-      const theme = categories.length === 1 ? `${categories[0]} Edition` : 'Mixed Edition';
-      document.getElementById('today-theme').textContent = theme;
+      const totalVotesEl = document.getElementById('total-votes');
+      if (totalVotesEl) {
+        totalVotesEl.textContent = totalVotes.toLocaleString();
+      }
     }
 
     function showScreen(screenId) {
@@ -1686,6 +1700,57 @@
       document.getElementById('prompt-options').value = '';
       
       showAdminMessage('Prompt added successfully!');
+      await renderPromptList();
+    }
+
+    async function bulkUpload() {
+      const jsonText = document.getElementById('bulk-json').value.trim();
+      
+      if (!jsonText) {
+        showAdminMessage('Please paste the JSON data', true);
+        return;
+      }
+
+      let prompts;
+      try {
+        prompts = JSON.parse(jsonText);
+      } catch (e) {
+        showAdminMessage('Invalid JSON format. Check for errors.', true);
+        return;
+      }
+
+      if (!Array.isArray(prompts)) {
+        showAdminMessage('JSON must be an array of prompts', true);
+        return;
+      }
+
+      showAdminMessage(`Uploading ${prompts.length} prompts...`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const prompt of prompts) {
+        if (!prompt.category || !prompt.text || !prompt.options) {
+          errorCount++;
+          continue;
+        }
+
+        const { error } = await DB.addPrompt({
+          category: prompt.category,
+          text: prompt.text,
+          options: prompt.options,
+          is_active: true
+        });
+
+        if (error) {
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      }
+
+      document.getElementById('bulk-json').value = '';
+      showAdminMessage(`Done! ${successCount} prompts added${errorCount > 0 ? `, ${errorCount} failed` : ''}`);
       await renderPromptList();
     }
 
