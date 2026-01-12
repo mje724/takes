@@ -4,113 +4,63 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TAKES - Daily Sports & Culture Opinions</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-primary: #050505; --bg-secondary: #0d0d0d; --bg-card: #111111; --bg-elevated: #1a1a1a;
-      --accent: #c8ff00; --accent-dim: #a3cc00; --text-primary: #ffffff; --text-secondary: #888888;
-      --text-muted: #444444; --border: #222222; --success: #00ff88; --warning: #ffaa00; --error: #ff4444;
+      --accent: #c8ff00; --text-primary: #ffffff; --text-secondary: #888888; --border: #222222;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
-    .container { max-width: 480px; margin: 0 auto; padding: 16px; position: relative; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+    .container { max-width: 480px; margin: 0 auto; padding: 16px; }
     .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-    .logo { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -2px; color: var(--accent); }
-    .logo-small { font-size: 20px; }
-    .header-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
-    .admin-link { font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; }
-    
-    .loading-screen, .start-screen, .game-screen, .results-screen, .admin-screen { display: none; }
-    .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 20px; }
-    .loader { width: 40px; height: 40px; border: 3px solid var(--bg-elevated); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .hero { text-align: center; margin: 40px 0; }
-    .hero-logo { font-family: 'Space Mono', monospace; font-size: 72px; font-weight: 700; color: var(--accent); text-shadow: 0 0 60px rgba(200, 255, 0, 0.3); }
-    .btn { width: 100%; padding: 18px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.2s; }
-    .btn-primary { background: var(--accent); color: var(--bg-primary); }
-    .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; }
-    
+    .logo { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; color: var(--accent); letter-spacing: -2px; }
+    .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-secondary); cursor: not-allowed; }
     .prompt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; margin-bottom: 20px; }
-    .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
-    .prompt-text { font-size: 26px; font-weight: 600; line-height: 1.35; margin-bottom: 28px; }
-    .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; }
-    .ranking-position { width: 30px; height: 30px; background: var(--bg-elevated); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--accent); }
-    .option-btn { width: 100%; text-align: left; padding: 15px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 10px; color: white; margin-bottom: 8px; cursor: pointer; font-size: 16px; }
+    .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; background: var(--bg-elevated); color: var(--accent); }
+    .prompt-text { font-size: 24px; font-weight: 600; line-height: 1.3; margin-bottom: 24px; }
+    .option-btn { width: 100%; text-align: left; padding: 16px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; cursor: pointer; }
     .option-btn.selected { border-color: var(--accent); background: rgba(200,255,0,0.1); }
-
-    .progress-bar { display: flex; gap: 5px; margin-bottom: 10px; }
-    .progress-segment { flex: 1; height: 4px; background: var(--bg-elevated); border-radius: 2px; position: relative; }
-    .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s; border-radius: 2px; }
-
-    .admin-section { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
-    .form-input, .form-textarea, .form-select { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-secondary); border: 1px solid var(--border); color: white; border-radius: 8px; font-family: inherit; }
-    .prompt-list-item { padding: 15px; border: 1px solid var(--border); margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-    .archived { opacity: 0.4; }
+    .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; }
+    .ranking-num { width: 24px; height: 24px; background: var(--accent); color: #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+    .loading-screen, .start-screen, .game-screen, .results-screen, .admin-screen { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="loading-screen" class="loading-screen"><div class="loader"></div><p>Loading Takes...</p></div>
+    <div id="loading-screen" style="display:flex; justify-content:center; align-items:center; height:60vh;">Loading...</div>
 
     <div id="start-screen" class="start-screen">
-      <div class="header">
-        <span class="header-date" id="header-date"></span>
-        <a href="#" class="admin-link" onclick="showAdmin(event)">Admin</a>
-      </div>
-      <div class="hero"><div class="hero-logo">TAKES</div><p>Daily Sports & Culture Opinions</p></div>
-      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Play Today's Set</button>
-      <div id="already-played-msg" style="text-align:center; color:var(--accent); margin-top:20px; display:none; font-family:'Space Mono'; font-size:12px;">You've submitted for today. See you tomorrow!</div>
+      <div class="header"><div class="logo">TAKES</div><a href="#" class="admin-link" onclick="showAdmin(event)" style="color:gray; font-size:12px; text-decoration:none;">Admin</a></div>
+      <div style="text-align:center; margin: 60px 0;"><h1 style="font-size:48px; margin-bottom:10px;">DAILY SET</h1><p style="color:gray;">Synchronized Sports & Culture Takes</p></div>
+      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Play Today's Takes</button>
+      <div id="already-played" style="display:none; text-align:center; color:var(--accent); margin-top:20px;">You've already played today!</div>
     </div>
 
     <div id="game-screen" class="game-screen">
-      <div class="header"><div class="logo logo-small">TAKES</div></div>
-      <div class="progress-bar" id="progress-bar"></div>
       <div id="prompt-container"></div>
       <button class="btn btn-primary" id="next-btn" onclick="nextPrompt()" disabled>Next Take</button>
     </div>
 
     <div id="results-screen" class="results-screen">
-      <div class="header"><div class="logo logo-small">TAKES</div></div>
-      <div style="text-align:center; margin-top:40px;">
-        <h2 style="font-size:32px; margin-bottom:10px;">Takes Recorded</h2>
-        <p style="color:var(--text-secondary);">Your opinions have been archived.</p>
-        <button class="btn btn-primary" style="margin-top:40px;" onclick="location.reload()">Back to Home</button>
-      </div>
+      <div class="header"><div class="logo">RESULTS</div></div>
+      <div id="results-container"></div>
+      <button class="btn btn-primary" onclick="location.reload()">Back to Home</button>
     </div>
 
     <div id="admin-screen" class="admin-screen">
-      <div class="header"><h2>Admin</h2><a href="#" class="admin-link" onclick="location.reload()">Back</a></div>
-      <div class="admin-section">
-        <h3>Bulk Upload (JSON)</h3>
-        <textarea class="form-textarea" id="bulk-json" placeholder="Paste JSON array here..." style="height:150px; font-family:'Space Mono'; font-size:10px;"></textarea>
-        <button class="btn btn-primary" onclick="handleBulkUpload()">Upload All</button>
-      </div>
-      <div class="admin-section">
-        <h3>Add Single Take</h3>
-        <select class="form-select" id="admin-type">
-          <option value="fill">Fill in the Blank</option>
-          <option value="ranking">Ranking</option>
-        </select>
-        <input type="text" class="form-input" id="admin-category" placeholder="Category (e.g. NBA, Music)">
-        <input type="text" class="form-input" id="admin-text" placeholder="Prompt text (use _____ for blanks)">
-        <textarea class="form-textarea" id="admin-options" placeholder="Options (one per line)"></textarea>
-        <button class="btn btn-primary" onclick="saveNewPrompt()">Save Take</button>
-      </div>
-      <div class="admin-section">
-        <h3>Library</h3>
-        <div id="admin-prompt-list"></div>
-      </div>
+      <div class="header"><h2>Admin</h2><button onclick="location.reload()">Exit</button></div>
+      <textarea id="bulk-json" style="width:100%; height:200px; background:#000; color:lime;" placeholder="Paste JSON here"></textarea>
+      <button class="btn btn-primary" onclick="handleBulkUpload()">Bulk Upload</button>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRra3Zsa2V4Z2d6dGhjdHdlbW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDIyODQsImV4cCI6MjA4MzgxODI4NH0.-YwHTbGiwJfefq-B75whfeCN-Exxi9buKxj0YcgCMWY';
-    
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Use your full key
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let todaysPrompts = [];
@@ -118,84 +68,56 @@
     let selectedOption = null;
 
     async function init() {
-      showScreen('loading-screen');
-      document.getElementById('header-date').innerText = new Date().toDateString();
-      if (localStorage.getItem('takes_played_today') === new Date().toDateString()) {
+      if (localStorage.getItem('takes_played_' + new Date().toDateString())) {
         document.getElementById('play-btn').disabled = true;
-        document.getElementById('already-played-msg').style.display = 'block';
+        document.getElementById('already-played').style.display = 'block';
       }
-      showScreen('start-screen');
-    }
-
-    function showScreen(id) {
-      ['loading-screen', 'start-screen', 'game-screen', 'results-screen', 'admin-screen'].forEach(s => document.getElementById(s).style.display = 'none');
-      document.getElementById(id).style.display = 'block';
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'block';
     }
 
     async function startGame() {
-      showScreen('loading-screen');
-      
-      // FLEXIBLE LOGIC: Get any 10 unused prompts
-      const { data: pool, error } = await supabaseClient
-        .from('prompts')
-        .select('*')
-        .eq('was_used', false)
-        .limit(10);
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      // 1. Fetch TOP 5 unused prompts. Because we order by ID, everyone gets the SAME 5.
+      const { data: pool } = await supabaseClient.from('prompts').select('*').eq('was_used', false).order('id', { ascending: true }).limit(5);
 
       if(!pool || pool.length < 5) {
-        alert("Admin needs to add at least 5 fresh takes (was_used = false) to the database.");
+        alert("Not enough new questions in the library!");
         location.reload();
         return;
       }
 
-      // Prioritize putting a ranking question first if it exists
+      // 2. Sort for Flow: Rankings first, MadLib category last
       todaysPrompts = pool.sort((a, b) => {
         if (a.type === 'ranking') return -1;
-        if (b.type === 'ranking') return 1;
+        if (b.category === 'MadLib') return 1;
         return 0;
-      }).slice(0, 5);
+      });
 
-      currentIdx = 0;
-      renderProgress();
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
       renderPrompt();
-      showScreen('game-screen');
-    }
-
-    function renderProgress() {
-      const bar = document.getElementById('progress-bar');
-      bar.innerHTML = todaysPrompts.map((_, i) => `
-        <div class="progress-segment">
-          <div class="progress-fill" style="width: ${i < currentIdx ? '100' : (i === currentIdx ? '50' : '0')}%"></div>
-        </div>
-      `).join('');
     }
 
     function renderPrompt() {
       const p = todaysPrompts[currentIdx];
       const container = document.getElementById('prompt-container');
-      const opts = p.options;
       selectedOption = null;
       document.getElementById('next-btn').disabled = (p.type !== 'ranking');
 
       if (p.type === 'ranking') {
-        selectedOption = opts.join('|||'); // Default rank
-        container.innerHTML = `
-          <div class="prompt-card">
-            <span class="prompt-category" style="background:var(--accent); color:black;">RANKING TASK</span>
-            <div class="prompt-text">${p.text}</div>
-            <div id="rank-list">${opts.map((o, i) => `<div class="ranking-item"><div class="ranking-position">${i+1}</div>${o}</div>`).join('')}</div>
-          </div>`;
+        selectedOption = p.options.join(' | '); 
+        container.innerHTML = `<div class="prompt-card"><span class="prompt-category">DAILY RANKING</span><div class="prompt-text">${p.text}</div>
+          ${p.options.map((o, i) => `<div class="ranking-item"><div class="ranking-num">${i+1}</div>${o}</div>`).join('')}</div>`;
       } else {
-        container.innerHTML = `
-          <div class="prompt-card">
-            <span class="prompt-category" style="background:var(--bg-elevated)">${p.category || 'Daily Take'}</span>
-            <div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>
-            <div id="options-list">${opts.map(o => `<button class="option-btn" onclick="setOption('${o.replace(/'/g, "\\'")}', this)">${o}</button>`).join('')}</div>
-          </div>`;
+        container.innerHTML = `<div class="prompt-card"><span class="prompt-category">${p.category}</span><div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>
+          ${p.options.map(o => `<button class="option-btn" onclick="setOpt('${o.replace(/'/g, "\\'")}', this)">${o}</button>`).join('')}</div>`;
       }
     }
 
-    function setOption(val, el) {
+    function setOpt(val, el) {
       selectedOption = val;
       document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
@@ -204,55 +126,45 @@
 
     async function nextPrompt() {
       const p = todaysPrompts[currentIdx];
-      // Save vote
       await supabaseClient.from('votes').insert([{ prompt_id: p.id, answer: selectedOption }]);
       
       currentIdx++;
       if (currentIdx >= todaysPrompts.length) {
-        // Mark these 5 questions as USED
-        const ids = todaysPrompts.map(tp => tp.id);
-        await supabaseClient.from('prompts').update({ was_used: true }).in('id', ids);
-        localStorage.setItem('takes_played_today', new Date().toDateString());
-        showScreen('results-screen');
+        // Only mark as used locally so stats stay synced for everyone today
+        localStorage.setItem('takes_played_' + new Date().toDateString(), 'true');
+        showResults();
       } else {
-        renderProgress();
         renderPrompt();
       }
     }
 
+    async function showResults() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'block';
+      const container = document.getElementById('results-container');
+      
+      let html = '';
+      for (let p of todaysPrompts) {
+        const { data: v } = await supabaseClient.from('votes').select('answer').eq('prompt_id', p.id);
+        const counts = {};
+        v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
+        
+        html += `<div class="prompt-card"><h3>${p.category}</h3><p style="margin-bottom:15px;">${p.text}</p>`;
+        p.options.forEach(opt => {
+          const pct = v.length ? Math.round(((counts[opt] || 0) / v.length) * 100) : 0;
+          html += `<div style="margin-bottom:10px;">${opt}: ${pct}% <div style="width:100%; height:4px; background:#222;"><div style="width:${pct}%; height:100%; background:var(--accent);"></div></div></div>`;
+        });
+        html += `</div>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function showAdmin(e) { e.preventDefault(); document.getElementById('start-screen').style.display='none'; document.getElementById('admin-screen').style.display='block'; }
     async function handleBulkUpload() {
-      const json = document.getElementById('bulk-json').value;
-      try {
-        const data = JSON.parse(json);
-        const { error } = await supabaseClient.from('prompts').insert(data);
-        if(error) throw error;
-        alert("Upload successful!");
-        location.reload();
-      } catch(e) { alert("Error: " + e.message); }
+      const data = JSON.parse(document.getElementById('bulk-json').value);
+      await supabaseClient.from('prompts').insert(data);
+      alert("Uploaded!"); location.reload();
     }
-
-    async function saveNewPrompt() {
-      const type = document.getElementById('admin-type').value;
-      const cat = document.getElementById('admin-category').value;
-      const text = document.getElementById('admin-text').value;
-      const opts = document.getElementById('admin-options').value.split('\n').filter(o => o.trim() !== '');
-      await supabaseClient.from('prompts').insert([{ type, category: cat, text, options: opts, was_used: false }]);
-      alert("Saved!");
-      location.reload();
-    }
-
-    async function showAdmin(e) {
-      e.preventDefault();
-      showScreen('admin-screen');
-      const { data } = await supabaseClient.from('prompts').select('*').order('created_at', {ascending: false});
-      document.getElementById('admin-prompt-list').innerHTML = data.map(p => `
-        <div class="prompt-list-item ${p.was_used ? 'archived' : ''}">
-          <div><strong>${p.category}</strong>: ${p.text.substring(0,30)}...</div>
-          <div style="font-size:10px;">${p.was_used ? 'USED' : 'LIVE'}</div>
-        </div>
-      `).join('');
-    }
-
     init();
   </script>
 </body>
