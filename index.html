@@ -25,39 +25,34 @@
     .header-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
     .admin-link { font-size: 12px; color: var(--text-muted); text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; }
     
-    /* Loading/Screens */
     .loading-screen, .start-screen, .game-screen, .results-screen, .admin-screen { display: none; }
     .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 20px; }
     .loader { width: 40px; height: 40px; border: 3px solid var(--bg-elevated); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* UI Components */
     .hero { text-align: center; margin: 40px 0; }
     .hero-logo { font-family: 'Space Mono', monospace; font-size: 72px; font-weight: 700; color: var(--accent); text-shadow: 0 0 60px rgba(200, 255, 0, 0.3); }
     .btn { width: 100%; padding: 18px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
     .btn-primary { background: var(--accent); color: var(--bg-primary); }
-    .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-muted); }
+    .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; }
     .btn-secondary { background: transparent; border: 2px solid var(--border); color: var(--text-secondary); }
     
-    /* Prompt Cards */
     .prompt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; margin-bottom: 20px; }
     .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; }
     .prompt-text { font-size: 26px; font-weight: 600; line-height: 1.35; margin-bottom: 28px; }
-    .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; cursor: grab; }
+    .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; }
     .ranking-position { width: 30px; height: 30px; background: var(--bg-elevated); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     .option-btn { width: 100%; text-align: left; padding: 15px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 10px; color: white; margin-bottom: 8px; cursor: pointer; }
     .option-btn.selected { border-color: var(--accent); background: rgba(200,255,0,0.1); }
 
-    /* Progress */
     .progress-bar { display: flex; gap: 5px; margin-bottom: 10px; }
     .progress-segment { flex: 1; height: 4px; background: var(--bg-elevated); border-radius: 2px; }
     .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s; }
     .completed .progress-fill { width: 100%; }
 
-    /* Admin Styles */
     .admin-section { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
     .form-input, .form-textarea, .form-select { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--bg-secondary); border: 1px solid var(--border); color: white; border-radius: 8px; }
-    .prompt-list-item { padding: 15px; border: 1px solid var(--border); margin-bottom: 10px; border-radius: 8px; opacity: 1; }
+    .prompt-list-item { padding: 15px; border: 1px solid var(--border); margin-bottom: 10px; border-radius: 8px; }
     .prompt-list-item.archived { opacity: 0.5; background: #222; }
   </style>
 </head>
@@ -71,7 +66,7 @@
         <a href="#" class="admin-link" onclick="showAdmin(event)">Admin</a>
       </div>
       <div class="hero"><div class="hero-logo">TAKES</div><p>Today's Daily Disciplines</p></div>
-      <button class="btn btn-primary" onclick="startGame()">Play Today's Takes</button>
+      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Play Today's Takes</button>
       <div id="already-played-msg" style="text-align:center; color:var(--accent); margin-top:15px; display:none;">You have already played today!</div>
     </div>
 
@@ -86,7 +81,7 @@
       <div class="header"><div class="logo logo-small">TAKES</div></div>
       <div style="text-align:center; margin-bottom:30px;"><h2>Your Takes Are In</h2></div>
       <div id="results-container"></div>
-      <button class="btn btn-primary" onclick="location.reload()">Play Again (Debug)</button>
+      <button class="btn btn-primary" onclick="location.reload()">Back to Home</button>
     </div>
 
     <div id="admin-screen" class="admin-screen">
@@ -112,7 +107,9 @@
   <script>
     const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRra3Zsa2V4Z2d6dGhjdHdlbW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDIyODQsImV4cCI6MjA4MzgxODI4NH0.-YwHTbGiwJfefq-B75whfeCN-Exxi9buKxj0YcgCMWY';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Rename variable to avoid conflict with the library
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let todaysPrompts = [];
     let currentIdx = 0;
@@ -122,9 +119,9 @@
       showScreen('loading-screen');
       document.getElementById('header-date').innerText = new Date().toDateString();
       
-      // Check if user played today
+      // Strict one-submission check
       if (localStorage.getItem('takes_played_today') === new Date().toDateString()) {
-        document.querySelector('.btn-primary').disabled = true;
+        document.getElementById('play-btn').disabled = true;
         document.getElementById('already-played-msg').style.display = 'block';
       }
       
@@ -139,15 +136,15 @@
     async function startGame() {
       showScreen('loading-screen');
       
-      // 1. Get Ranking, 2. Get 3 Fillers, 3. Get MadLib
-      const { data: ranks } = await supabase.from('prompts').select('*').eq('type', 'ranking').eq('was_used', false).limit(1);
-      const { data: fillers } = await supabase.from('prompts').select('*').eq('type', 'fill').eq('was_used', false).limit(3);
-      const { data: madlibs } = await supabase.from('prompts').select('*').eq('category', 'MadLib').eq('was_used', false).limit(1);
+      // Pull specific set: 1 Rank, 3 Fillers, 1 MadLib finale
+      const { data: ranks } = await supabaseClient.from('prompts').select('*').eq('type', 'ranking').eq('was_used', false).limit(1);
+      const { data: fillers } = await supabaseClient.from('prompts').select('*').eq('type', 'fill').eq('was_used', false).limit(3);
+      const { data: madlibs } = await supabaseClient.from('prompts').select('*').eq('category', 'MadLib').eq('was_used', false).limit(1);
       
       todaysPrompts = [...(ranks||[]), ...(fillers||[]), ...(madlibs||[])];
       
       if(todaysPrompts.length === 0) {
-        alert("No fresh takes today! Admin needs to add more.");
+        alert("No fresh takes available. Admin must add new prompts and mark them 'false' for was_used.");
         location.reload();
         return;
       }
@@ -171,16 +168,17 @@
       document.getElementById('next-btn').disabled = (p.type !== 'ranking');
 
       if (p.type === 'ranking') {
-        selectedOption = opts.join('|||'); // Default order
+        selectedOption = opts.join('|||'); 
         container.innerHTML = `<div class="prompt-card">
           <span class="prompt-category" style="background:var(--accent); color:black">RANKING</span>
           <div class="prompt-text">${p.text}</div>
           <div id="rank-list">${opts.map((o, i) => `<div class="ranking-item"><div class="ranking-position">${i+1}</div>${o}</div>`).join('')}</div>
-          <p style="font-size:12px; color:gray; text-align:center;">Drag logic simplified: Currently submits default order.</p>
+          <p style="font-size:12px; color:gray; text-align:center; margin-top:10px;">Daily Cross-Discipline Task</p>
         </div>`;
       } else {
+        const displayCategory = p.category === 'MadLib' ? 'THE FINALE' : p.category;
         container.innerHTML = `<div class="prompt-card">
-          <span class="prompt-category" style="background:var(--bg-elevated)">${p.category}</span>
+          <span class="prompt-category" style="background:var(--bg-elevated)">${displayCategory}</span>
           <div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>
           ${opts.map(o => `<button class="option-btn" onclick="setOption('${o}', this)">${o}</button>`).join('')}
         </div>`;
@@ -195,15 +193,14 @@
     }
 
     async function nextPrompt() {
-      // Record vote in DB
       const p = todaysPrompts[currentIdx];
-      await supabase.from('votes').insert([{ prompt_id: p.id, answer: selectedOption }]);
+      await supabaseClient.from('votes').insert([{ prompt_id: p.id, answer: selectedOption }]);
       
       currentIdx++;
       if (currentIdx >= todaysPrompts.length) {
-        // Mark as used
+        // Archive prompts immediately so they never repeat
         const ids = todaysPrompts.map(tp => tp.id);
-        await supabase.from('prompts').update({ was_used: true }).in('id', ids);
+        await supabaseClient.from('prompts').update({ was_used: true }).in('id', ids);
         
         localStorage.setItem('takes_played_today', new Date().toDateString());
         showResults();
@@ -216,17 +213,16 @@
     async function showResults() {
       showScreen('results-screen');
       const container = document.getElementById('results-container');
-      container.innerHTML = `<p style="text-align:center">Takes archived. Come back tomorrow!</p>`;
+      container.innerHTML = `<p style="text-align:center">Thanks for playing! Your takes have been archived for today.</p>`;
     }
 
-    // Admin Functions
     async function showAdmin(e) {
       e.preventDefault();
       showScreen('admin-screen');
-      const { data } = await supabase.from('prompts').select('*').order('created_at', {ascending: false});
+      const { data } = await supabaseClient.from('prompts').select('*').order('created_at', {ascending: false});
       document.getElementById('admin-prompt-list').innerHTML = data.map(p => `
         <div class="prompt-list-item ${p.was_used ? 'archived' : ''}">
-          <b>${p.type}</b>: ${p.text} ${p.was_used ? '(USED)' : '(LIVE)'}
+          <b>${p.type}</b>: ${p.text} ${p.was_used ? '(ARCHIVED)' : '(LIVE)'}
         </div>
       `).join('');
     }
@@ -234,12 +230,18 @@
     async function saveNewPrompt() {
       const type = document.getElementById('admin-type').value;
       const text = document.getElementById('admin-text').value;
-      const options = document.getElementById('admin-options').value.split('\n').filter(o => o.trim() !== '');
+      const optionsInput = document.getElementById('admin-options').value;
+      const options = optionsInput.split('\n').map(o => o.trim()).filter(o => o !== '');
       
-      await supabase.from('prompts').insert([{ 
+      if(!text || options.length === 0) {
+        alert("Please provide text and options.");
+        return;
+      }
+
+      await supabaseClient.from('prompts').insert([{ 
         type, text, options, category: type === 'MadLib' ? 'MadLib' : 'Daily', was_used: false 
       }]);
-      alert("Saved!");
+      alert("Saved to library!");
       location.reload();
     }
 
