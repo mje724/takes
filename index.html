@@ -3,179 +3,179 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TAKES - Daily Sports & Culture Opinions</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>TAKES - Daily Sports & Culture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg-primary: #050505; --bg-secondary: #0d0d0d; --bg-card: #111111; --bg-elevated: #1a1a1a;
+      --bg-primary: #050505; --bg-secondary: #0d0d0d; --bg-card: #111111;
       --accent: #c8ff00; --text-primary: #ffffff; --text-secondary: #888888; --border: #222222;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
-    .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+    .container { max-width: 480px; margin: 0 auto; padding: 16px; position: relative; }
     .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-    .logo { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; color: var(--accent); letter-spacing: -2px; }
-    .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-primary:disabled { background: var(--bg-elevated); color: var(--text-secondary); cursor: not-allowed; }
+    .logo { font-family: 'Space Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -2px; color: var(--accent); }
+    .header-date { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
+    .btn { width: 100%; padding: 18px 24px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
+    .btn-primary { background: var(--accent); color: var(--bg-primary); }
+    .btn-primary:disabled { background: #1a1a1a; color: #444; cursor: not-allowed; }
     .prompt-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 32px 24px; margin-bottom: 20px; }
-    .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; background: var(--bg-elevated); color: var(--accent); }
-    .prompt-text { font-size: 24px; font-weight: 600; line-height: 1.3; margin-bottom: 24px; }
-    .option-btn { width: 100%; text-align: left; padding: 16px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: white; margin-bottom: 10px; cursor: pointer; }
+    .prompt-category { font-family: 'Space Mono', monospace; font-size: 11px; padding: 6px 12px; border-radius: 4px; background: #1a1a1a; color: var(--accent); margin-bottom: 15px; display: inline-block; }
+    .prompt-text { font-size: 26px; font-weight: 600; line-height: 1.35; margin-bottom: 28px; }
+    .option-btn { width: 100%; text-align: left; padding: 16px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: #fff; margin-bottom: 10px; cursor: pointer; }
     .option-btn.selected { border-color: var(--accent); background: rgba(200,255,0,0.1); }
     .ranking-item { background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center; }
-    .ranking-num { width: 24px; height: 24px; background: var(--accent); color: #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
-    .loading-screen, .start-screen, .game-screen, .results-screen, .admin-screen { display: none; }
+    .ranking-num { width: 28px; height: 28px; background: var(--accent); color: #000; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .progress-bar { display: flex; gap: 6px; margin-bottom: 20px; }
+    .progress-seg { flex: 1; height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s; }
+    .screen { display: none; }
+    .admin-section { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px; }
+    textarea { width: 100%; background: #000; border: 1px solid var(--border); color: #0f0; padding: 10px; font-family: 'Space Mono'; margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="loading-screen" style="display:flex; justify-content:center; align-items:center; height:60vh;">Loading...</div>
+    <div id="loading" style="display:flex; justify-content:center; align-items:center; height:60vh; font-family:'Space Mono'; color:var(--accent);">INITIALIZING TAKES...</div>
 
-    <div id="start-screen" class="start-screen">
-      <div class="header"><div class="logo">TAKES</div><a href="#" class="admin-link" onclick="showAdmin(event)" style="color:gray; font-size:12px; text-decoration:none;">Admin</a></div>
-      <div style="text-align:center; margin: 60px 0;"><h1 style="font-size:48px; margin-bottom:10px;">DAILY SET</h1><p style="color:gray;">Synchronized Sports & Culture Takes</p></div>
-      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Play Today's Takes</button>
-      <div id="already-played" style="display:none; text-align:center; color:var(--accent); margin-top:20px;">You've already played today!</div>
+    <div id="start-screen" class="screen">
+      <div class="header"><div class="logo">TAKES</div><span class="header-date" id="date-display"></span></div>
+      <div style="text-align:center; margin: 60px 0;"><h1 style="font-size:48px; font-weight:900; line-height:1;">DAILY SET</h1><p style="color:var(--text-secondary); margin-top:10px;">Synchronized community opinions.</p></div>
+      <button class="btn btn-primary" id="play-btn" onclick="startGame()">Enter Daily Set</button>
+      <div id="played-msg" style="display:none; text-align:center; color:var(--accent); margin-top:20px; font-size:14px;">Already submitted. Back tomorrow.</div>
+      <div style="text-align:center; margin-top:60px;"><a href="#" onclick="showAdmin()" style="color:#444; font-size:11px; text-decoration:none;">ADMIN CONTROLS</a></div>
     </div>
 
-    <div id="game-screen" class="game-screen">
+    <div id="game-screen" class="screen">
+      <div class="header"><div class="logo" style="font-size:20px;">TAKES</div><div id="prog-text" style="font-family:'Space Mono'; font-size:12px; color:#444;"></div></div>
+      <div class="progress-bar" id="progress-bar"></div>
       <div id="prompt-container"></div>
-      <button class="btn btn-primary" id="next-btn" onclick="nextPrompt()" disabled>Next Take</button>
+      <button class="btn btn-primary" id="next-btn" onclick="nextTake()" disabled>Confirm Take</button>
     </div>
 
-    <div id="results-screen" class="results-screen">
+    <div id="results-screen" class="screen">
       <div class="header"><div class="logo">RESULTS</div></div>
       <div id="results-container"></div>
       <button class="btn btn-primary" onclick="location.reload()">Back to Home</button>
     </div>
 
-    <div id="admin-screen" class="admin-screen">
-      <div class="header"><h2>Admin</h2><button onclick="location.reload()">Exit</button></div>
-      <textarea id="bulk-json" style="width:100%; height:200px; background:#000; color:lime;" placeholder="Paste JSON here"></textarea>
-      <button class="btn btn-primary" onclick="handleBulkUpload()">Bulk Upload</button>
-      <button class="btn btn-secondary" onclick="archiveCurrentSet()" style="background:#222; color:#fff; border:1px solid #444;">Archive Current Set (New Day)</button>
+    <div id="admin-screen" class="screen">
+      <div class="header"><h2>ADMIN</h2><button class="btn" onclick="location.reload()" style="width:auto; padding:5px 15px; background:#333; color:#fff;">Exit</button></div>
+      <div class="admin-section">
+        <p style="margin-bottom:10px; font-size:14px; color:gray;">Bulk Upload JSON (5 per set recommended)</p>
+        <textarea id="bulk-json" rows="8"></textarea>
+        <button class="btn btn-primary" onclick="handleUpload()">Upload New Prompts</button>
+        <button class="btn" onclick="rotateDay()" style="background:#222; color:#fff; margin-top:20px; border:1px solid #444;">Archive Current Set (New Day)</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SB_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
+    const SB_KEY = 'PASTE_YOUR_FULL_KEY_HERE';
+    const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
-    let todaysPrompts = [];
-    let currentIdx = 0;
-    let selectedOption = null;
+    let prompts = [];
+    let cur = 0;
+    let choice = null;
 
     async function init() {
-      if (localStorage.getItem('takes_played_' + new Date().toDateString())) {
+      document.getElementById('date-display').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      if (localStorage.getItem('takes_' + new Date().toDateString())) {
         document.getElementById('play-btn').disabled = true;
-        document.getElementById('already-played').style.display = 'block';
+        document.getElementById('played-msg').style.display = 'block';
       }
-      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
       document.getElementById('start-screen').style.display = 'block';
     }
 
     async function startGame() {
-      document.getElementById('start-screen').style.display = 'none';
-      document.getElementById('loading-screen').style.display = 'flex';
-
-      const { data: pool } = await supabaseClient.from('prompts').select('*').eq('was_used', false).order('id', { ascending: true }).limit(5);
-
-      if(!pool || pool.length < 5) {
-        alert("Library low! Admin must archive today's set or add more prompts.");
-        location.reload();
-        return;
-      }
-
-      todaysPrompts = pool.sort((a, b) => {
+      const { data } = await sb.from('prompts').select('*').eq('was_used', false).order('id', { ascending: true }).limit(5);
+      if(!data || data.length < 5) { alert("Library low. Admin needs to add/archive."); return; }
+      
+      prompts = data.sort((a, b) => {
         if (a.type === 'ranking') return -1;
         if (b.category === 'MadLib') return 1;
         return 0;
       });
 
-      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'none';
       document.getElementById('game-screen').style.display = 'block';
-      renderPrompt();
+      updateProgress();
+      render();
     }
 
-    function renderPrompt() {
-      const p = todaysPrompts[currentIdx];
-      const container = document.getElementById('prompt-container');
-      selectedOption = null;
+    function render() {
+      const p = prompts[cur];
+      choice = null;
       document.getElementById('next-btn').disabled = (p.type !== 'ranking');
-
-      if (p.type === 'ranking') {
-        selectedOption = p.options.join(' | '); 
-        container.innerHTML = `<div class="prompt-card"><span class="prompt-category">DAILY RANKING</span><div class="prompt-text">${p.text}</div>
-          ${p.options.map((o, i) => `<div class="ranking-item"><div class="ranking-num">${i+1}</div>${o}</div>`).join('')}</div>`;
+      let html = `<div class="prompt-card"><div class="prompt-category">${p.category}</div><div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>`;
+      
+      if(p.type === 'ranking') {
+        choice = "Ranked";
+        html += p.options.map((o, i) => `<div class="ranking-item"><div class="ranking-num">${i+1}</div><div>${o}</div></div>`).join('');
       } else {
-        container.innerHTML = `<div class="prompt-card"><span class="prompt-category">${p.category}</span><div class="prompt-text">${p.text.replace('_____', '<span style="color:var(--accent)">_____</span>')}</div>
-          ${p.options.map(o => `<button class="option-btn" onclick="setOpt('${o.replace(/'/g, "\\'")}', this)">${o}</button>`).join('')}</div>`;
+        html += p.options.map(o => `<button class="option-btn" onclick="setOpt('${o.replace(/'/g, "\\'")}', this)">${o}</button>`).join('');
       }
+      html += `</div>`;
+      document.getElementById('prompt-container').innerHTML = html;
     }
 
     function setOpt(val, el) {
-      selectedOption = val;
+      choice = val;
       document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
       document.getElementById('next-btn').disabled = false;
     }
 
-    async function nextPrompt() {
-      const p = todaysPrompts[currentIdx];
-      await supabaseClient.from('votes').insert([{ prompt_id: p.id, answer: selectedOption }]);
-      
-      currentIdx++;
-      if (currentIdx >= todaysPrompts.length) {
-        localStorage.setItem('takes_played_' + new Date().toDateString(), 'true');
+    async function nextTake() {
+      await sb.from('votes').insert([{ prompt_id: prompts[cur].id, answer: choice }]);
+      cur++;
+      if(cur >= prompts.length) {
+        localStorage.setItem('takes_' + new Date().toDateString(), 'true');
         showResults();
-      } else {
-        renderPrompt();
-      }
+      } else { updateProgress(); render(); }
     }
 
     async function showResults() {
       document.getElementById('game-screen').style.display = 'none';
       document.getElementById('results-screen').style.display = 'block';
-      const container = document.getElementById('results-container');
-      
       let html = '';
-      for (let p of todaysPrompts) {
-        const { data: v } = await supabaseClient.from('votes').select('answer').eq('prompt_id', p.id);
+      for (let p of prompts) {
+        const { data: v } = await sb.from('votes').select('answer').eq('prompt_id', p.id);
         const counts = {};
-        if (v) v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
-        
-        html += `<div class="prompt-card"><h3>${p.category}</h3><p style="margin-bottom:15px;">${p.text}</p>`;
+        v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
+        html += `<div class="prompt-card"><div class="prompt-category">${p.category}</div><div style="font-size:16px; margin-bottom:15px; font-weight:600;">${p.text}</div>`;
         p.options.forEach(opt => {
-          const total = v ? v.length : 0;
-          const pct = total ? Math.round(((counts[opt] || 0) / total) * 100) : 0;
-          html += `<div style="margin-bottom:10px;">${opt}: ${pct}% <div style="width:100%; height:4px; background:#222;"><div style="width:${pct}%; height:100%; background:var(--accent);"></div></div></div>`;
+          const pct = v.length ? Math.round(((counts[opt] || 0) / v.length) * 100) : 0;
+          html += `<div style="margin-bottom:12px; font-size:14px;"><div style="display:flex; justify-content:space-between;"><span>${opt}</span><span>${pct}%</span></div>
+            <div style="width:100%; height:4px; background:#1a1a1a; margin-top:4px;"><div style="width:${pct}%; height:100%; background:var(--accent);"></div></div></div>`;
         });
         html += `</div>`;
       }
-      container.innerHTML = html;
+      document.getElementById('results-container').innerHTML = html;
     }
 
-    async function archiveCurrentSet() {
-      if (!confirm("This will start a new day for everyone. Continue?")) return;
-      const { data: pool } = await supabaseClient.from('prompts').select('id').eq('was_used', false).order('id', { ascending: true }).limit(5);
-      if (pool) {
-        const ids = pool.map(p => p.id);
-        await supabaseClient.from('prompts').update({ was_used: true }).in('id', ids);
-        alert("Day rotated! Refreshing...");
-        location.reload();
+    function updateProgress() {
+      const bar = document.getElementById('progress-bar');
+      bar.innerHTML = prompts.map((_, i) => `<div class="progress-seg"><div class="progress-fill" style="width:${i < cur ? '100' : (i === cur ? '50' : '0')}%"></div></div>`).join('');
+      document.getElementById('prog-text').innerText = (cur + 1) + " / " + prompts.length;
+    }
+
+    function showAdmin() { document.getElementById('start-screen').style.display='none'; document.getElementById('admin-screen').style.display='block'; }
+    async function handleUpload() {
+      const data = JSON.parse(document.getElementById('bulk-json').value);
+      await sb.from('prompts').insert(data);
+      alert("Successfully Added!"); location.reload();
+    }
+    async function rotateDay() {
+      if(!confirm("Rotate to next day?")) return;
+      const { data } = await sb.from('prompts').select('id').eq('was_used', false).order('id', { ascending: true }).limit(5);
+      if(data) {
+        await sb.from('prompts').update({ was_used: true }).in('id', data.map(d => d.id));
+        alert("Day Rotated!"); location.reload();
       }
-    }
-
-    function showAdmin(e) { e.preventDefault(); document.getElementById('start-screen').style.display='none'; document.getElementById('admin-screen').style.display='block'; }
-    async function handleBulkUpload() {
-      try {
-        const data = JSON.parse(document.getElementById('bulk-json').value);
-        await supabaseClient.from('prompts').insert(data);
-        alert("Uploaded!"); location.reload();
-      } catch (e) { alert("Invalid JSON!"); }
     }
     init();
   </script>
