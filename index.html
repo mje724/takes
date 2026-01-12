@@ -1130,32 +1130,39 @@
 
     /* Category Selection */
     .category-select-title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       margin-bottom: 12px;
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .category-select-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      justify-content: center;
     }
 
     .category-select-btn {
       background: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 8px;
       font-family: 'Outfit', sans-serif;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
       color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.15s;
-      text-align: center;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .category-select-btn:hover {
@@ -1170,8 +1177,10 @@
     }
 
     .category-select-btn.all-btn {
-      grid-column: 1 / -1;
-      background: var(--bg-elevated);
+      width: 100%;
+      padding: 14px;
+      font-size: 13px;
+      margin-bottom: 4px;
     }
 
     .category-select-btn.all-btn.selected {
@@ -1190,7 +1199,7 @@
     }
 
     .yesterday-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -1264,7 +1273,7 @@
         <button class="category-select-btn" data-category="MLB" onclick="toggleCategory(this)">MLB</button>
         <button class="category-select-btn" data-category="Soccer" onclick="toggleCategory(this)">Soccer</button>
         <button class="category-select-btn" data-category="Actors" onclick="toggleCategory(this)">Actors</button>
-        <button class="category-select-btn" data-category="Musicians" onclick="toggleCategory(this)">Musicians</button>
+        <button class="category-select-btn" data-category="Musicians" onclick="toggleCategory(this)">Music</button>
       </div>
 
       <button class="btn btn-primary" onclick="startGame()">Play</button>
