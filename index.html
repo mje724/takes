@@ -1089,12 +1089,11 @@
 
   <script>
     // ==================== CONFIG ====================
-    // IMPORTANT: Replace these with your Supabase credentials
     const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRra3Zsa2V4Z2d6dGhjdHdlbW5yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyNDIyODQsImV4cCI6MjA4MzgxODI4NH0.-YwHTbGiwJfefq-B75whfeCN-Exxi9buKxj0YcgCMWY';
 
     // Initialize Supabase client
-    let supabase;
+    let supabaseClient;
     let dbReady = false;
 
     // ==================== DATABASE LAYER ====================
@@ -1107,7 +1106,7 @@
         }
         
         try {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           dbReady = true;
         } catch (error) {
           console.error('Supabase init error:', error);
@@ -1117,14 +1116,14 @@
 
       // Get active prompts for today's game
       getActivePrompts: async () => {
-        if (!supabase) {
+        if (!supabaseClient) {
           // localStorage fallback
           const data = localStorage.getItem('takes_prompts');
           const prompts = data ? JSON.parse(data) : [];
           return prompts.filter(p => p.is_active !== false).slice(0, 5);
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('prompts')
           .select('*')
           .eq('is_active', true)
@@ -1140,12 +1139,12 @@
 
       // Get all prompts for admin
       getAllPrompts: async () => {
-        if (!supabase) {
+        if (!supabaseClient) {
           const data = localStorage.getItem('takes_prompts');
           return data ? JSON.parse(data) : [];
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('prompts')
           .select('*')
           .order('created_at', { ascending: false });
@@ -1159,7 +1158,7 @@
 
       // Add a new prompt
       addPrompt: async (prompt) => {
-        if (!supabase) {
+        if (!supabaseClient) {
           // localStorage fallback
           const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
           prompt.id = Date.now();
@@ -1170,7 +1169,7 @@
           return { data: prompt, error: null };
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('prompts')
           .insert([{
             category: prompt.category,
@@ -1186,14 +1185,14 @@
 
       // Delete a prompt
       deletePrompt: async (id) => {
-        if (!supabase) {
+        if (!supabaseClient) {
           const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
           const filtered = prompts.filter(p => p.id !== id);
           localStorage.setItem('takes_prompts', JSON.stringify(filtered));
           return { error: null };
         }
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('prompts')
           .delete()
           .eq('id', id);
@@ -1203,7 +1202,7 @@
 
       // Record a vote
       recordVote: async (promptId, answer, isOther = false) => {
-        if (!supabase) {
+        if (!supabaseClient) {
           // localStorage fallback
           const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
           const prompt = prompts.find(p => p.id === promptId);
@@ -1220,7 +1219,7 @@
         }
 
         // Insert vote record
-        const { error: voteError } = await supabase
+        const { error: voteError } = await supabaseClient
           .from('votes')
           .insert([{
             prompt_id: promptId,
@@ -1233,14 +1232,14 @@
         }
 
         // Increment prompt vote count
-        await supabase.rpc('increment_vote_count', { prompt_id: promptId });
+        await supabaseClient.rpc('increment_vote_count', { prompt_id: promptId });
 
         return { error: voteError };
       },
 
       // Get results for a prompt
       getResults: async (promptId) => {
-        if (!supabase) {
+        if (!supabaseClient) {
           // localStorage fallback
           const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
           const prompt = prompts.find(p => p.id === promptId);
@@ -1256,7 +1255,7 @@
             .sort((a, b) => b.count - a.count);
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('votes')
           .select('answer')
           .eq('prompt_id', promptId);
@@ -1282,12 +1281,12 @@
 
       // Get total vote count
       getTotalVotes: async () => {
-        if (!supabase) {
+        if (!supabaseClient) {
           const prompts = JSON.parse(localStorage.getItem('takes_prompts') || '[]');
           return prompts.reduce((sum, p) => sum + (p.vote_count || 0), 0);
         }
 
-        const { count, error } = await supabase
+        const { count, error } = await supabaseClient
           .from('votes')
           .select('*', { count: 'exact', head: true });
 
