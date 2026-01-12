@@ -55,12 +55,13 @@
       <div class="header"><h2>Admin</h2><button onclick="location.reload()">Exit</button></div>
       <textarea id="bulk-json" style="width:100%; height:200px; background:#000; color:lime;" placeholder="Paste JSON here"></textarea>
       <button class="btn btn-primary" onclick="handleBulkUpload()">Bulk Upload</button>
+      <button class="btn btn-secondary" onclick="archiveCurrentSet()" style="background:#222; color:#fff; border:1px solid #444;">Archive Current Set (New Day)</button>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://tkkvlkexggzthctwemnr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Use your full key
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let todaysPrompts = [];
@@ -80,16 +81,14 @@
       document.getElementById('start-screen').style.display = 'none';
       document.getElementById('loading-screen').style.display = 'flex';
 
-      // 1. Fetch TOP 5 unused prompts. Because we order by ID, everyone gets the SAME 5.
       const { data: pool } = await supabaseClient.from('prompts').select('*').eq('was_used', false).order('id', { ascending: true }).limit(5);
 
       if(!pool || pool.length < 5) {
-        alert("Not enough new questions in the library!");
+        alert("Library low! Admin must archive today's set or add more prompts.");
         location.reload();
         return;
       }
 
-      // 2. Sort for Flow: Rankings first, MadLib category last
       todaysPrompts = pool.sort((a, b) => {
         if (a.type === 'ranking') return -1;
         if (b.category === 'MadLib') return 1;
@@ -130,7 +129,6 @@
       
       currentIdx++;
       if (currentIdx >= todaysPrompts.length) {
-        // Only mark as used locally so stats stay synced for everyone today
         localStorage.setItem('takes_played_' + new Date().toDateString(), 'true');
         showResults();
       } else {
@@ -147,11 +145,12 @@
       for (let p of todaysPrompts) {
         const { data: v } = await supabaseClient.from('votes').select('answer').eq('prompt_id', p.id);
         const counts = {};
-        v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
+        if (v) v.forEach(vote => counts[vote.answer] = (counts[vote.answer] || 0) + 1);
         
         html += `<div class="prompt-card"><h3>${p.category}</h3><p style="margin-bottom:15px;">${p.text}</p>`;
         p.options.forEach(opt => {
-          const pct = v.length ? Math.round(((counts[opt] || 0) / v.length) * 100) : 0;
+          const total = v ? v.length : 0;
+          const pct = total ? Math.round(((counts[opt] || 0) / total) * 100) : 0;
           html += `<div style="margin-bottom:10px;">${opt}: ${pct}% <div style="width:100%; height:4px; background:#222;"><div style="width:${pct}%; height:100%; background:var(--accent);"></div></div></div>`;
         });
         html += `</div>`;
@@ -159,11 +158,24 @@
       container.innerHTML = html;
     }
 
+    async function archiveCurrentSet() {
+      if (!confirm("This will start a new day for everyone. Continue?")) return;
+      const { data: pool } = await supabaseClient.from('prompts').select('id').eq('was_used', false).order('id', { ascending: true }).limit(5);
+      if (pool) {
+        const ids = pool.map(p => p.id);
+        await supabaseClient.from('prompts').update({ was_used: true }).in('id', ids);
+        alert("Day rotated! Refreshing...");
+        location.reload();
+      }
+    }
+
     function showAdmin(e) { e.preventDefault(); document.getElementById('start-screen').style.display='none'; document.getElementById('admin-screen').style.display='block'; }
     async function handleBulkUpload() {
-      const data = JSON.parse(document.getElementById('bulk-json').value);
-      await supabaseClient.from('prompts').insert(data);
-      alert("Uploaded!"); location.reload();
+      try {
+        const data = JSON.parse(document.getElementById('bulk-json').value);
+        await supabaseClient.from('prompts').insert(data);
+        alert("Uploaded!"); location.reload();
+      } catch (e) { alert("Invalid JSON!"); }
     }
     init();
   </script>
