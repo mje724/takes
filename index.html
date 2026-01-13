@@ -170,6 +170,34 @@
       font-weight: 400;
     }
 
+    /* Hot Take Card */
+    .hot-take-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .hot-take-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .hot-take-text {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
     .categories-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -1174,6 +1202,12 @@
         <p class="hero-tagline">Daily sports & culture opinions.<br>See where you stand.</p>
       </div>
 
+      <!-- Hot Take of the Day -->
+      <div id="hot-take-card" class="hot-take-card" style="display: none;">
+        <div class="hot-take-label">🔥 Yesterday's Hot Take</div>
+        <div class="hot-take-text" id="hot-take-text"></div>
+      </div>
+
       <button class="btn btn-primary" onclick="startGame()">Play</button>
 
       <div class="play-count"><span id="total-votes">0</span> takes today</div>
@@ -1521,6 +1555,50 @@
 
       resetPlayStatus: () => {
         localStorage.removeItem('takes_last_played');
+      },
+
+      // Save a mad lib
+      saveMadlib: async (text) => {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        
+        if (!supabaseClient) {
+          // localStorage fallback
+          const madlibs = JSON.parse(localStorage.getItem('takes_madlibs') || '[]');
+          madlibs.push({ text, date: today, created_at: new Date().toISOString() });
+          localStorage.setItem('takes_madlibs', JSON.stringify(madlibs));
+          return { error: null };
+        }
+
+        const { error } = await supabaseClient
+          .from('madlibs')
+          .insert([{ text, date: today }]);
+
+        return { error };
+      },
+
+      // Get yesterday's mad libs
+      getYesterdayMadlibs: async () => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        if (!supabaseClient) {
+          // localStorage fallback
+          const madlibs = JSON.parse(localStorage.getItem('takes_madlibs') || '[]');
+          return madlibs.filter(m => m.date === yesterdayStr);
+        }
+
+        const { data, error } = await supabaseClient
+          .from('madlibs')
+          .select('*')
+          .eq('date', yesterdayStr)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching madlibs:', error);
+          return [];
+        }
+        return data || [];
       }
     };
 
@@ -1588,6 +1666,29 @@
     }
 
     // ==================== GAME FLOW ====================
+    
+    // Seeded random number generator - same seed = same sequence
+    function seededRandom(seed) {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    }
+
+    // Get today's seed (same for everyone on the same day)
+    function getTodaySeed() {
+      const today = new Date();
+      return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    }
+
+    // Shuffle array with seed
+    function seededShuffle(array, seed) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(seed + i) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
     async function startGame() {
       let allPrompts = await DB.getActivePrompts();
       
@@ -1596,17 +1697,21 @@
         return;
       }
 
+      // Get today's seed - same for everyone
+      const seed = getTodaySeed();
+
       // Separate by type
       const fillPrompts = allPrompts.filter(p => p.type !== 'ranking');
       const rankingPrompts = allPrompts.filter(p => p.type === 'ranking');
 
-      // Shuffle and pick 3 fill-in-blank
-      const shuffledFill = fillPrompts.sort(() => Math.random() - 0.5);
+      // Shuffle with seed and pick 3 fill-in-blank
+      const shuffledFill = seededShuffle(fillPrompts, seed);
       const selectedFill = shuffledFill.slice(0, 3);
 
-      // Pick 1 random ranking
-      const selectedRanking = rankingPrompts.length > 0 
-        ? [rankingPrompts[Math.floor(Math.random() * rankingPrompts.length)]]
+      // Pick 1 ranking with seed
+      const shuffledRanking = seededShuffle(rankingPrompts, seed + 1000);
+      const selectedRanking = shuffledRanking.length > 0 
+        ? [shuffledRanking[0]]
         : [];
 
       // Create mad lib prompt
@@ -1868,7 +1973,10 @@
       const prompt = todaysPrompts[currentPromptIndex];
       
       // Record vote (skip for madlib since it's not a real DB prompt)
-      if (prompt.id !== 'madlib') {
+      if (prompt.id === 'madlib') {
+        // Save the mad lib
+        await DB.saveMadlib(selectedOption);
+      } else {
         await DB.recordVote(prompt.id, selectedOption, isOtherSelected);
       }
 
@@ -2281,11 +2389,29 @@
     }
 
     // ==================== INIT ====================
+    async function loadHotTake() {
+      try {
+        const madlibs = await DB.getYesterdayMadlibs();
+        
+        if (madlibs && madlibs.length > 0) {
+          // Pick a random one from yesterday's submissions
+          const randomIndex = Math.floor(Math.random() * madlibs.length);
+          const hotTake = madlibs[randomIndex];
+          
+          document.getElementById('hot-take-text').textContent = `"${hotTake.text}"`;
+          document.getElementById('hot-take-card').style.display = 'block';
+        }
+      } catch (e) {
+        console.log('Could not load hot take:', e);
+      }
+    }
+
     async function init() {
       await DB.init();
       await seedInitialData();
       updateDates();
       await updateStats();
+      await loadHotTake();
       showScreen('start-screen');
     }
 
